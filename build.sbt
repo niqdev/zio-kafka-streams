@@ -1,6 +1,8 @@
 lazy val V = new {
-  val avro4s = "4.0.0"
-  val zio    = "1.0.1"
+  val avro4s    = "4.0.0"
+  val confluent = "5.5.1"
+  val kafka     = "2.5.1"
+  val zio       = "1.0.1"
 }
 
 lazy val commonSettings = Seq(
@@ -13,9 +15,14 @@ lazy val serde = project
   .settings(commonSettings)
   .settings(
     name := "kafka-streams-serde",
+    resolvers ++= Seq(
+      "confluent" at "https://packages.confluent.io/maven/"
+    ),
     libraryDependencies ++= Seq(
-      "com.sksamuel.avro4s" %% "avro4s-core"    % V.avro4s,
-      "com.sksamuel.avro4s" %% "avro4s-refined" % V.avro4s
+      "org.apache.kafka"    %% "kafka-streams-scala"      % V.kafka,
+      "io.confluent"         % "kafka-streams-avro-serde" % V.confluent,
+      "com.sksamuel.avro4s" %% "avro4s-core"              % V.avro4s,
+      "com.sksamuel.avro4s" %% "avro4s-refined"           % V.avro4s
     )
   )
 
@@ -35,13 +42,14 @@ lazy val examples = project
   .dependsOn(core)
   .settings(commonSettings)
   .settings(
-    name := "zio-kafka-streams-examples"
+    name := "examples"
   )
 
 lazy val root = project
   .in(file("."))
   .aggregate(core, serde, examples)
   .settings(
+    name := "zio-kafka-streams-root",
     addCommandAlias("checkFormat", ";scalafmtCheckAll;scalafmtSbtCheck"),
     addCommandAlias("format", ";scalafmtAll;scalafmtSbt"),
     addCommandAlias("build", ";checkFormat;clean;test")
