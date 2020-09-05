@@ -1,15 +1,16 @@
 lazy val V = new {
-  val avro4s    = "4.0.0"
-  val confluent = "5.5.1"
-  val kafka     = "2.5.1"
-  val zio       = "1.0.1"
+  val avro4s     = "4.0.0"
+  val confluent  = "5.5.1"
+  val kafka      = "2.5.1"
+  val logback    = "1.2.3"
+  val zio        = "1.0.1"
+  val zioConfig  = "1.0.0-RC26"
+  val zioLogging = "0.5.0"
 
   // examples
   val enumeratum = "1.6.1"
   val newtype    = "0.4.4"
   val refined    = "0.9.15"
-  val zioLogging = "0.5.0"
-  val zioConfig  = "1.0.0-RC26"
 }
 
 lazy val commonSettings = Seq(
@@ -23,7 +24,7 @@ lazy val commonSettings = Seq(
     "-language:existentials",
     "-language:higherKinds",
     "-language:implicitConversions",
-    "-Xlint",
+    "-Xlint"
     //"-Wconf:any:error"
   )
 )
@@ -50,9 +51,10 @@ lazy val core = project
   .settings(
     name := "zio-kafka-streams",
     libraryDependencies ++= Seq(
-      "dev.zio" %% "zio"         % V.zio,
-      "dev.zio" %% "zio-logging" % V.zioLogging,
-      "dev.zio" %% "zio-config"  % V.zioConfig
+      "dev.zio"       %% "zio"             % V.zio,
+      "dev.zio"       %% "zio-config"      % V.zioConfig,
+      "dev.zio"       %% "zio-logging"     % V.zioLogging,
+      "ch.qos.logback" % "logback-classic" % V.logback
     )
   )
 

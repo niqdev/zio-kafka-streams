@@ -3,7 +3,7 @@ package zio.kafka.streams
 import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.scala.StreamsBuilder
 import zio._
-import zio.kafka.streams.settings.settings.Settings
+import zio.kafka.streams.settings.Settings
 import zio.logging.Logger
 
 // TODO ZKStream and ZKTable

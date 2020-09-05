@@ -1,6 +1,6 @@
 package zio.kafka.streams
 
-import zio.kafka.streams.settings.settings.Settings
+import zio.kafka.streams.settings.Settings
 import zio.logging.{ Logging, log }
 import zio._
 

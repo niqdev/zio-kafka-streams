@@ -4,7 +4,7 @@ import org.apache.kafka.streams.KafkaStreams
 import zio._
 import zio.config.{ ZConfig, config }
 import zio.kafka.streams.KafkaStreamsTopology.KafkaStreamsTopology
-import zio.kafka.streams.settings.settings.Settings
+import zio.kafka.streams.settings.Settings
 import zio.logging.{ Logging, log }
 
 object KafkaStreamsRuntime {
