@@ -5,13 +5,16 @@ Write Kafka Streams applications using ZIO and access the internal state store d
 > WIP
 
 TODO
-* [ ] local kafka setup
+* [x] local kafka setup
 * [ ] examples
-* [ ] avro serde with confluent schema-registry integration
-* [ ] core: runtime / ZKStream / ZKTable wrappers
-* [ ] api with Caliban
+* [ ] avro serde with confluent schema-registry
+* [ ] json serde with circe
+* [ ] core wrappers
+* [ ] interop-cats
+* [ ] api with Caliban (pagination + subscriptions)
 * [ ] metrics with Prometheus
 * [ ] testkit
+* [ ] helm chart StatefulSet
 
 ## Development
 

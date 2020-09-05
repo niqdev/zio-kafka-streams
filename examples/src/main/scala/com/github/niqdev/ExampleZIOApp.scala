@@ -1,10 +1,5 @@
 package com.github.niqdev
 
-import zio._
-import zio.console._
+import zio.kafka.streams.KafkaStreamsApp
 
-object ExampleZIOApp extends App {
-
-  override def run(args: List[String]): URIO[ZEnv, ExitCode] =
-    putStrLn("hello").exitCode
-}
+object ExampleZIOApp extends KafkaStreamsApp

@@ -8,6 +8,8 @@ lazy val V = new {
   val enumeratum = "1.6.1"
   val newtype    = "0.4.4"
   val refined    = "0.9.15"
+  val zioLogging = "0.5.0"
+  val zioConfig  = "1.0.0-RC26"
 }
 
 lazy val commonSettings = Seq(
@@ -22,7 +24,7 @@ lazy val commonSettings = Seq(
     "-language:higherKinds",
     "-language:implicitConversions",
     "-Xlint",
-    "-Wconf:any:error"
+    //"-Wconf:any:error"
   )
 )
 
@@ -48,7 +50,9 @@ lazy val core = project
   .settings(
     name := "zio-kafka-streams",
     libraryDependencies ++= Seq(
-      "dev.zio" %% "zio" % V.zio
+      "dev.zio" %% "zio"         % V.zio,
+      "dev.zio" %% "zio-logging" % V.zioLogging,
+      "dev.zio" %% "zio-config"  % V.zioConfig
     )
   )
 
@@ -62,10 +66,11 @@ lazy val examples = project
       "-Ymacro-annotations"
     ),
     libraryDependencies ++= Seq(
-      "com.sksamuel.avro4s" %% "avro4s-refined" % V.avro4s,
-      "eu.timepit"          %% "refined"        % V.refined,
-      "io.estatico"         %% "newtype"        % V.newtype,
-      "com.beachape"        %% "enumeratum"     % V.enumeratum
+      "dev.zio"             %% "zio-config-refined" % V.zioConfig,
+      "com.sksamuel.avro4s" %% "avro4s-refined"     % V.avro4s,
+      "eu.timepit"          %% "refined"            % V.refined,
+      "io.estatico"         %% "newtype"            % V.newtype,
+      "com.beachape"        %% "enumeratum"         % V.enumeratum
     )
   )
 
