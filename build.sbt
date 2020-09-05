@@ -7,7 +7,18 @@ lazy val V = new {
 
 lazy val commonSettings = Seq(
   organization := "com.github.niqdev",
-  scalaVersion := "2.13.3"
+  scalaVersion := "2.13.3",
+  scalacOptions ++= Seq(
+    "-encoding",
+    "UTF-8",
+    "-unchecked",
+    "-explaintypes",
+    "-language:existentials",
+    "-language:higherKinds",
+    "-language:implicitConversions",
+    "-Xlint",
+    "-Wconf:any:error"
+  )
 )
 
 lazy val serde = project
@@ -21,8 +32,7 @@ lazy val serde = project
     libraryDependencies ++= Seq(
       "org.apache.kafka"    %% "kafka-streams-scala"      % V.kafka,
       "io.confluent"         % "kafka-streams-avro-serde" % V.confluent,
-      "com.sksamuel.avro4s" %% "avro4s-core"              % V.avro4s,
-      "com.sksamuel.avro4s" %% "avro4s-refined"           % V.avro4s
+      "com.sksamuel.avro4s" %% "avro4s-core"              % V.avro4s
     )
   )
 

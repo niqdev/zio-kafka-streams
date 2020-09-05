@@ -1,9 +1,9 @@
 package kafka.streams
 
-import eu.timepit.refined.api.Refined
-import eu.timepit.refined.string.Url
+import kafka.streams.serde.internal.EitherOps
 
 package object serde {
 
-  final type UrlString = String Refined Url
+  private[serde] final implicit def eitherSyntax(either: Either.type): EitherOps =
+    new EitherOps(either)
 }
