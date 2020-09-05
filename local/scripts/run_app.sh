@@ -8,4 +8,4 @@ export SCHEMA_REGISTRY_URL="http://localhost:8081"
 CURRENT_PATH=$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd -P)
 cd ${CURRENT_PATH}/../..
 
-sbt -jvm-debug 5005 "examples/runMain com.github.niqdev.Example"
+sbt -jvm-debug 5005 "examples/runMain com.github.niqdev.ExampleZIOApp"

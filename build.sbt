@@ -3,6 +3,11 @@ lazy val V = new {
   val confluent = "5.5.1"
   val kafka     = "2.5.1"
   val zio       = "1.0.1"
+
+  // examples
+  val enumeratum = "1.6.1"
+  val newtype    = "0.4.4"
+  val refined    = "0.9.15"
 }
 
 lazy val commonSettings = Seq(
@@ -52,7 +57,16 @@ lazy val examples = project
   .dependsOn(core)
   .settings(commonSettings)
   .settings(
-    name := "examples"
+    name := "examples",
+    scalacOptions ++= Seq(
+      "-Ymacro-annotations"
+    ),
+    libraryDependencies ++= Seq(
+      "com.sksamuel.avro4s" %% "avro4s-refined" % V.avro4s,
+      "eu.timepit"          %% "refined"        % V.refined,
+      "io.estatico"         %% "newtype"        % V.newtype,
+      "com.beachape"        %% "enumeratum"     % V.enumeratum
+    )
   )
 
 lazy val root = project
