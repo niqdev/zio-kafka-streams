@@ -38,4 +38,16 @@ object AvroCodec {
 
       Serdes.fromFn[T](serializer, deserializer)
     }
+
+  /**
+    * TODO docs
+    */
+  def genericKey[T >: Null: Encoder: Decoder]: AvroCodec[T] =
+    generic(isKey = true)
+
+  /**
+    * TODO docs
+    */
+  def genericValue[T >: Null: Encoder: Decoder]: AvroCodec[T] =
+    generic(isKey = false)
 }
