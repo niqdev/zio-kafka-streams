@@ -15,7 +15,7 @@ object KafkaStreamsRuntime {
       _            <- log.info("Setup runtime ...")
       settings     <- config[Settings]
       topology     <- KafkaStreamsTopology.build
-      kafkaStreams <- ZIO.effect(new KafkaStreams(topology, settings.properties))
+      kafkaStreams <- ZIO.effect(new KafkaStreams(topology, settings.properties()))
       _            <- log.info("Start runtime ...")
       _            <- ZIO.effect(kafkaStreams.start())
     } yield kafkaStreams
