@@ -51,11 +51,9 @@ lazy val core = project
   .settings(
     name := "zio-kafka-streams",
     libraryDependencies ++= Seq(
-      "dev.zio"       %% "zio"                 % V.zio,
-      "dev.zio"       %% "zio-config"          % V.zioConfig,
-      "dev.zio"       %% "zio-config-magnolia" % V.zioConfig,
-      "dev.zio"       %% "zio-logging"         % V.zioLogging,
-      "ch.qos.logback" % "logback-classic"     % V.logback
+      "dev.zio" %% "zio"         % V.zio,
+      "dev.zio" %% "zio-config"  % V.zioConfig,
+      "dev.zio" %% "zio-logging" % V.zioLogging
     )
   )
 
@@ -69,11 +67,13 @@ lazy val examples = project
       "-Ymacro-annotations"
     ),
     libraryDependencies ++= Seq(
-      "dev.zio"             %% "zio-config-refined" % V.zioConfig,
-      "com.sksamuel.avro4s" %% "avro4s-refined"     % V.avro4s,
-      "eu.timepit"          %% "refined"            % V.refined,
-      "io.estatico"         %% "newtype"            % V.newtype,
-      "com.beachape"        %% "enumeratum"         % V.enumeratum
+      "dev.zio"             %% "zio-config-magnolia" % V.zioConfig,
+      "dev.zio"             %% "zio-config-refined"  % V.zioConfig,
+      "com.sksamuel.avro4s" %% "avro4s-refined"      % V.avro4s,
+      "eu.timepit"          %% "refined"             % V.refined,
+      "io.estatico"         %% "newtype"             % V.newtype,
+      "com.beachape"        %% "enumeratum"          % V.enumeratum,
+      "ch.qos.logback"       % "logback-classic"     % V.logback % Runtime
     )
   )
 

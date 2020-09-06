@@ -2,7 +2,6 @@ package zio.kafka.streams
 
 import org.apache.kafka.streams.Topology
 import zio._
-import zio.kafka.streams.settings.AppSettings
 import zio.logging.Logger
 
 object KafkaStreamsTopology {
@@ -12,11 +11,11 @@ object KafkaStreamsTopology {
     def build: Task[Topology]
   }
 
-  def make[T: Tag](buildTopology: (Logger[String], AppSettings, T) => Task[Topology]) =
-    ZLayer.fromServices((log: Logger[String], appSettings: AppSettings, topologySettings: T) =>
+  def make[T <: KafkaStreamsSettings: Tag](buildTopology: (Logger[String], T) => Task[Topology]) =
+    ZLayer.fromServices((log: Logger[String], settings: T) =>
       new Service {
         override def build: Task[Topology] =
-          buildTopology(log, appSettings, topologySettings)
+          buildTopology(log, settings)
       }
     )
 
