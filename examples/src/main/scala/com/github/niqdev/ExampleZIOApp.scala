@@ -2,61 +2,38 @@ package com.github.niqdev
 
 import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.scala.StreamsBuilder
-import zio.config.ConfigDescriptor.string
-import zio.config._
 import zio.kafka.streams.KafkaStreamsApp
-import zio.kafka.streams.KafkaStreamsTopology.{ KafkaStreamsTopology, Service }
-import zio.{ Layer, Task, ZIO, ZLayer }
+import zio.kafka.streams.settings.AppSettings
+import zio.logging.Logger
+import zio.{ Task, ZIO }
 
 final case class TopologySettings(
   userSource: String,
   repositorySource: String,
   gitHubSink: String
 )
-object TopologySettings {
-  private[this] final val descriptor: ConfigDescriptor[TopologySettings] =
-    (string("USER_SOURCE") |@|
-      string("REPOSITORY_SOURCE") |@|
-      string("GITHUB_SINK"))(
-      TopologySettings.apply,
-      TopologySettings.unapply
-    )
 
-  final val configEnvLayer: Layer[ReadError[String], ZConfig[TopologySettings]] =
-    ZConfig.fromSystemEnv(descriptor)
-}
+object ExampleZIOApp extends KafkaStreamsApp[TopologySettings] {
 
-object CustomTopology {
+  override def topology(
+    log: Logger[String],
+    appSettings: AppSettings,
+    topologySettings: TopologySettings
+  ): Task[Topology] =
+    for {
+      _ <- log.info("Build topology ...")
+      _ <- log.info(s"schemaRegistryUrl: ${appSettings.schemaRegistryUrl}")
+      topology <- ZIO.effect {
+        import org.apache.kafka.streams.scala.ImplicitConversions.{ consumedFromSerde, producedFromSerde }
+        import org.apache.kafka.streams.scala.Serdes.String
 
-  val live: TopologySettings => Service =
-    settings =>
-      new Service {
-        override def build: Task[Topology] =
-          for {
-            topology <- ZIO.effect {
-              import org.apache.kafka.streams.scala.ImplicitConversions.{
-                consumedFromSerde,
-                producedFromSerde
-              }
-              import org.apache.kafka.streams.scala.Serdes.String
+        val builder = new StreamsBuilder()
 
-              val builder = new StreamsBuilder()
+        val sourceStream    = builder.stream[String, String](topologySettings.userSource)(consumedFromSerde)
+        val upperCaseStream = sourceStream.mapValues(_.toUpperCase())
+        upperCaseStream.to(topologySettings.gitHubSink)(producedFromSerde)
 
-              val sourceStream    = builder.stream[String, String](settings.userSource)(consumedFromSerde)
-              val upperCaseStream = sourceStream.mapValues(_.toUpperCase())
-              upperCaseStream.to(settings.gitHubSink)(producedFromSerde)
-
-              builder.build()
-            }
-          } yield topology
+        builder.build()
       }
-
-  val topologyLayer: ZLayer[ZConfig[TopologySettings], Nothing, KafkaStreamsTopology] =
-    ZLayer.fromService(CustomTopology.live)
+    } yield topology
 }
-
-object ExampleZIOApp
-    extends KafkaStreamsApp(
-      TopologySettings.configEnvLayer >+>
-        CustomTopology.topologyLayer
-    )

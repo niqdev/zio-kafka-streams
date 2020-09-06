@@ -51,10 +51,11 @@ lazy val core = project
   .settings(
     name := "zio-kafka-streams",
     libraryDependencies ++= Seq(
-      "dev.zio"       %% "zio"             % V.zio,
-      "dev.zio"       %% "zio-config"      % V.zioConfig,
-      "dev.zio"       %% "zio-logging"     % V.zioLogging,
-      "ch.qos.logback" % "logback-classic" % V.logback
+      "dev.zio"       %% "zio"                 % V.zio,
+      "dev.zio"       %% "zio-config"          % V.zioConfig,
+      "dev.zio"       %% "zio-config-magnolia" % V.zioConfig,
+      "dev.zio"       %% "zio-logging"         % V.zioLogging,
+      "ch.qos.logback" % "logback-classic"     % V.logback
     )
   )
 

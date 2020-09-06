@@ -4,16 +4,18 @@ import org.apache.kafka.streams.KafkaStreams
 import zio._
 import zio.config.{ ZConfig, config }
 import zio.kafka.streams.KafkaStreamsTopology.KafkaStreamsTopology
-import zio.kafka.streams.settings.Settings
+import zio.kafka.streams.settings.AppSettings
 import zio.logging.{ Logging, log }
 
 object KafkaStreamsRuntime {
 
+  // TODO add errorHandler
+  // TODO add extra properties
   private[this] def start
-    : ZIO[Logging with ZConfig[Settings] with KafkaStreamsTopology, Throwable, KafkaStreams] =
+    : ZIO[Logging with ZConfig[AppSettings] with KafkaStreamsTopology, Throwable, KafkaStreams] =
     for {
       _            <- log.info("Setup runtime ...")
-      settings     <- config[Settings]
+      settings     <- config[AppSettings]
       topology     <- KafkaStreamsTopology.build
       kafkaStreams <- ZIO.effect(new KafkaStreams(topology, settings.properties()))
       _            <- log.info("Start runtime ...")
@@ -30,6 +32,6 @@ object KafkaStreamsRuntime {
         _ <- ZIO.effectTotal(kafkaStreams.close(java.time.Duration.ofSeconds(1)))
       } yield ()
 
-  def make: ZManaged[Logging with ZConfig[Settings] with KafkaStreamsTopology, Throwable, KafkaStreams] =
+  def make: ZManaged[Logging with ZConfig[AppSettings] with KafkaStreamsTopology, Throwable, KafkaStreams] =
     ZManaged.make(start)(stop)
 }

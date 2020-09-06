@@ -11,7 +11,7 @@ import scala.jdk.CollectionConverters.MapHasAsJava
 // TODO handle custom properties
 object settings {
 
-  final case class Settings(
+  final case class AppSettings(
     applicationId: String,
     bootstrapServers: String,
     schemaRegistryUrl: String
@@ -27,16 +27,17 @@ object settings {
     }
   }
 
-  object Settings {
-    final val descriptor: ConfigDescriptor[Settings] =
+  object AppSettings {
+    // TODO autoderive
+    final val descriptor: ConfigDescriptor[AppSettings] =
       (string("APPLICATION_ID") |@|
         string("BOOTSTRAP_SERVERS") |@|
         string("SCHEMA_REGISTRY_URL"))(
-        Settings.apply,
-        Settings.unapply
+        AppSettings.apply,
+        AppSettings.unapply
       )
 
-    final val configLocalLayer: Layer[ReadError[String], ZConfig[Settings]] =
+    final val configLocalLayer: Layer[ReadError[String], ZConfig[AppSettings]] =
       ZConfig.fromMap(
         Map(
           "APPLICATION_NAME"    -> "zio-kafka-streams",
@@ -46,7 +47,7 @@ object settings {
         descriptor
       )
 
-    final val configEnvLayer: Layer[ReadError[String], ZConfig[Settings]] =
+    final val configEnvLayer: Layer[ReadError[String], ZConfig[AppSettings]] =
       ZConfig.fromSystemEnv(descriptor)
   }
 }
