@@ -1,4 +1,5 @@
-package zio.kafka.streams
+package zio.kafka
+package streams
 
 import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.scala.StreamsBuilder

@@ -1,3 +1,4 @@
-package zio.kafka.streams
+package zio.kafka
+package streams
 
-class ZKTable {}
+object ZKTable {}

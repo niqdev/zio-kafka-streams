@@ -1,29 +1,26 @@
-package zio.kafka.streams
+package zio.kafka
+package streams
 
 import org.apache.kafka.streams.KafkaStreams
 import zio._
-import zio.config.{ ZConfig, config }
-import zio.kafka.streams.KafkaStreamsTopology._
-import zio.logging.{ Logging, log }
+import zio.config._
+import zio.logging._
 
-// TODO ZKSRuntime
-object KafkaStreamsRuntime {
-  final type KafkaStreamRuntimeEnv[T <: KafkaStreamsSettings] = Logging
-    with ZConfig[T]
-    with KafkaStreamsTopology
+// TODO KafkaStreamsSettings
+object ZKSRuntime {
+  final type ZKSRuntime[T <: KafkaStreamsSettings] = Logging with ZConfig[T] with ZKSTopology
 
   /**
     * TODO docs
     */
-  def make[T <: KafkaStreamsSettings: Tag]: ZManaged[KafkaStreamRuntimeEnv[T], Throwable, KafkaStreams] =
+  def make[T <: KafkaStreamsSettings: Tag]: ZManaged[ZKSRuntime[T], Throwable, KafkaStreams] =
     ZManaged.make(setup[T])(stop)
 
-  private[this] def setup[T <: KafkaStreamsSettings: Tag]
-    : ZIO[KafkaStreamRuntimeEnv[T], Throwable, KafkaStreams] =
+  private[this] def setup[T <: KafkaStreamsSettings: Tag]: ZIO[ZKSRuntime[T], Throwable, KafkaStreams] =
     for {
-      settings     <- config[T]
+      settings     <- ZIO.access[ZConfig[T]](_.get)
       _            <- log.info("Build topology ...")
-      topology     <- buildTopology
+      topology     <- ZKSTopology.buildTopology
       _            <- log.info("Setup runtime ...")
       kafkaStreams <- ZIO.effect(new KafkaStreams(topology, settings.properties))
       _            <- log.info("Start runtime ...")
@@ -32,7 +29,7 @@ object KafkaStreamsRuntime {
 
   private[this] def startKafkaStreams[T <: KafkaStreamsSettings: Tag](
     kafkaStreams: KafkaStreams
-  ): ZIO[KafkaStreamRuntimeEnv[T], Throwable, KafkaStreams] =
+  ): ZIO[ZKSRuntime[T], Throwable, KafkaStreams] =
     ZIO.effectAsyncM { callback =>
 
       def setupShutdownHandler =

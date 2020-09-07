@@ -1,9 +1,10 @@
-package zio.kafka.streams
+package zio.kafka
+package streams
 
 import org.apache.kafka.streams.Topology
 import zio._
-import zio.config.{ ReadError, ZConfig, config }
-import zio.logging.{ Logging, log }
+import zio.config._
+import zio.logging._
 
 // TODO remove constraint T <: KafkaStreamsSettings
 abstract class KafkaStreamsApp[T <: KafkaStreamsSettings: Tag](
@@ -14,16 +15,17 @@ abstract class KafkaStreamsApp[T <: KafkaStreamsSettings: Tag](
     kafkaStreamsApp.provideLayer(kafkaStreamsLayer).exitCode
 
   // TODO print all settings
-  private[this] final lazy val kafkaStreamsApp: ZIO[KafkaStreamsEnv[T], Throwable, Unit] =
+  private[this] final lazy val kafkaStreamsApp
+    : ZIO[Logging with ZConfig[T] with ZKSTopology, Throwable, Unit] =
     for {
-      settings <- config[T]
+      settings <- ZIO.access[ZConfig[T]](_.get)
       //_ <- log.info(s"${write(descriptor[T], settings).map(_.flattenString())}")
       _ <- log.info(s"KafkaStreamsApp ${settings.applicationId}")
-      _ <- KafkaStreamsRuntime.make.useForever
+      _ <- ZKSRuntime.make[T].useForever
     } yield ()
 
   private[this] final lazy val kafkaStreamsLayer =
-    Logging.console() ++ configLayer >+> KafkaStreamsTopology.make[T](runApp)
+    Logging.console() ++ configLayer >+> ZKSTopology.make[T](runApp)
 
   /**
     * TODO docs

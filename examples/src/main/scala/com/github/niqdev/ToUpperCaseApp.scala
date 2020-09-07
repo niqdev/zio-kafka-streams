@@ -4,8 +4,8 @@ import org.apache.kafka.streams.Topology
 import zio.config.ConfigDescriptor.string
 import zio.config._
 import zio.kafka.streams._
-import zio.logging.{ Logging, log }
-import zio.{ Layer, ZIO }
+import zio.logging._
+import zio._
 
 final case class MySettings(
   applicationId: String,

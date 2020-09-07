@@ -1,4 +1,5 @@
-package zio.kafka.streams
+package zio.kafka
+package streams
 
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig
 import org.apache.kafka.streams.StreamsConfig
