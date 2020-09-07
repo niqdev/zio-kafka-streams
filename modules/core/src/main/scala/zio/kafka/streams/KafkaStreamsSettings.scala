@@ -5,6 +5,7 @@ import org.apache.kafka.streams.StreamsConfig
 
 import scala.jdk.CollectionConverters.MapHasAsJava
 
+// TODO generic service
 trait KafkaStreamsSettings {
   def applicationId: String
   def bootstrapServers: String

@@ -3,9 +3,10 @@ package zio.kafka.streams
 import org.apache.kafka.streams.KafkaStreams
 import zio._
 import zio.config.{ ZConfig, config }
-import zio.kafka.streams.KafkaStreamsTopology.KafkaStreamsTopology
+import zio.kafka.streams.KafkaStreamsTopology._
 import zio.logging.{ Logging, log }
 
+// TODO ZKSRuntime
 object KafkaStreamsRuntime {
   final type KafkaStreamRuntimeEnv[T <: KafkaStreamsSettings] = Logging
     with ZConfig[T]
@@ -22,7 +23,7 @@ object KafkaStreamsRuntime {
     for {
       settings     <- config[T]
       _            <- log.info("Build topology ...")
-      topology     <- KafkaStreamsTopology.build
+      topology     <- buildTopology
       _            <- log.info("Setup runtime ...")
       kafkaStreams <- ZIO.effect(new KafkaStreams(topology, settings.properties))
       _            <- log.info("Start runtime ...")

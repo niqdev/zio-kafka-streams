@@ -1,8 +1,8 @@
 package zio.kafka
 
-import zio.Has
-import zio.config.ZConfig
-import zio.logging.Logging
+import zio._
+import zio.config._
+import zio.logging._
 
 package object streams {
 

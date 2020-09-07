@@ -2,8 +2,10 @@ package zio.kafka.streams
 
 import org.apache.kafka.streams.Topology
 import zio._
-import zio.logging.Logger
+import zio.config.ZConfig
+import zio.logging.Logging
 
+// TODO ZKSTopology
 object KafkaStreamsTopology {
   type KafkaStreamsTopology = Has[KafkaStreamsTopology.Service]
 
@@ -11,14 +13,18 @@ object KafkaStreamsTopology {
     def build: Task[Topology]
   }
 
-  def make[T <: KafkaStreamsSettings: Tag](buildTopology: (Logger[String], T) => Task[Topology]) =
-    ZLayer.fromServices((log: Logger[String], settings: T) =>
-      new Service {
-        override def build: Task[Topology] =
-          buildTopology(log, settings)
-      }
-    )
+  def make[T <: KafkaStreamsSettings: Tag](
+    effect: ZIO[Logging with ZConfig[T], Throwable, Topology]
+  ): ZLayer[Logging with ZConfig[T], Throwable, KafkaStreamsTopology] =
+    effect
+      .mapEffect(topology =>
+        new Service {
+          override def build: Task[Topology] =
+            IO.succeed(topology)
+        }
+      )
+      .toLayer
 
-  def build: RIO[KafkaStreamsTopology, Topology] =
+  def buildTopology: RIO[KafkaStreamsTopology, Topology] =
     ZIO.accessM[KafkaStreamsTopology](_.get.build)
 }

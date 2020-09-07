@@ -1,12 +1,11 @@
 package com.github.niqdev
 
 import org.apache.kafka.streams.Topology
-import org.apache.kafka.streams.scala.StreamsBuilder
 import zio.config.ConfigDescriptor.string
 import zio.config._
 import zio.kafka.streams._
-import zio.logging.Logger
-import zio.{ Layer, Task, ZIO }
+import zio.logging.{ Logging, log }
+import zio.{ Layer, ZIO }
 
 final case class MySettings(
   applicationId: String,
@@ -47,24 +46,21 @@ object MySettings {
     )
 }
 
-object ToUpperCaseApp extends KafkaStreamsApp[MySettings](MySettings.configLocalLayer) {
+object ToUpperCaseApp extends KafkaStreamsApp(MySettings.configLocalLayer) {
 
   // TODO ZKStream/ZKTable
-  // TODO topology: layer vs runMain
-  override def run(log: Logger[String], settings: MySettings): Task[Topology] =
+  // TODO wrap into a service ZConfig[MySettings] to make it more generic/flexible
+  override def runApp: ZIO[Logging with ZConfig[MySettings], Throwable, Topology] =
     for {
-      _ <- log.info(s"schemaRegistryUrl: ${settings.schemaRegistryUrl}")
-      topology <- ZIO.effect {
+      _        <- log.info("TODO")
+      settings <- ZIO.access[ZConfig[MySettings]](_.get)
+      topology <- ZKStream.builder { builder =>
         import org.apache.kafka.streams.scala.ImplicitConversions.{ consumedFromSerde, producedFromSerde }
         import org.apache.kafka.streams.scala.Serdes.String
-
-        val builder = new StreamsBuilder()
 
         val sourceStream    = builder.stream[String, String](settings.sourceTopic)(consumedFromSerde)
         val upperCaseStream = sourceStream.mapValues(_.toUpperCase())
         upperCaseStream.to(settings.sinkTopic)(producedFromSerde)
-
-        builder.build()
       }
     } yield topology
 }

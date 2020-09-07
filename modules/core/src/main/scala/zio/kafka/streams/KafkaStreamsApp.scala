@@ -3,8 +3,9 @@ package zio.kafka.streams
 import org.apache.kafka.streams.Topology
 import zio._
 import zio.config.{ ReadError, ZConfig, config }
-import zio.logging.{ Logger, Logging, log }
+import zio.logging.{ Logging, log }
 
+// TODO remove constraint T <: KafkaStreamsSettings
 abstract class KafkaStreamsApp[T <: KafkaStreamsSettings: Tag](
   configLayer: Layer[ReadError[String], ZConfig[T]]
 ) extends App {
@@ -22,10 +23,10 @@ abstract class KafkaStreamsApp[T <: KafkaStreamsSettings: Tag](
     } yield ()
 
   private[this] final lazy val kafkaStreamsLayer =
-    Logging.console() ++ configLayer >+> KafkaStreamsTopology.make[T](run)
+    Logging.console() ++ configLayer >+> KafkaStreamsTopology.make[T](runApp)
 
   /**
     * TODO docs
     */
-  def run(log: Logger[String], settings: T): Task[Topology]
+  def runApp: ZIO[Logging with ZConfig[T], Throwable, Topology]
 }
