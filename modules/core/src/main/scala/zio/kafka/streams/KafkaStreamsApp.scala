@@ -10,9 +10,10 @@ abstract class KafkaStreamsApp[T <: KafkaStreamsSettings: Tag](
 ) extends App {
 
   override def run(args: List[String]): URIO[ZEnv, ExitCode] =
-    program.provideLayer(kafkaStreamsLayer).exitCode
+    kafkaStreamsApp.provideLayer(kafkaStreamsLayer).exitCode
 
-  private[this] final lazy val program: ZIO[KafkaStreamsEnv[T], Throwable, Unit] =
+  // TODO print all settings
+  private[this] final lazy val kafkaStreamsApp: ZIO[KafkaStreamsEnv[T], Throwable, Unit] =
     for {
       settings <- config[T]
       //_ <- log.info(s"${write(descriptor[T], settings).map(_.flattenString())}")
@@ -21,10 +22,10 @@ abstract class KafkaStreamsApp[T <: KafkaStreamsSettings: Tag](
     } yield ()
 
   private[this] final lazy val kafkaStreamsLayer =
-    Logging.console() ++ configLayer >+> KafkaStreamsTopology.make[T](topology)
+    Logging.console() ++ configLayer >+> KafkaStreamsTopology.make[T](run)
 
   /**
     * TODO docs
     */
-  def topology(log: Logger[String], settings: T): Task[Topology]
+  def run(log: Logger[String], settings: T): Task[Topology]
 }

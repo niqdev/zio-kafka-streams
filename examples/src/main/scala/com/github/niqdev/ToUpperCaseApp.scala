@@ -14,7 +14,10 @@ final case class MySettings(
   schemaRegistryUrl: String,
   sourceTopic: String,
   sinkTopic: String
-) extends KafkaStreamsSettings
+) extends KafkaStreamsSettings {
+  override def extraProperties: Map[String, AnyRef] =
+    Map.empty
+}
 object MySettings {
 
   // example auto derivation
@@ -47,7 +50,8 @@ object MySettings {
 object ToUpperCaseApp extends KafkaStreamsApp[MySettings](MySettings.configLocalLayer) {
 
   // TODO ZKStream/ZKTable
-  override def topology(log: Logger[String], settings: MySettings): Task[Topology] =
+  // TODO topology: layer vs runMain
+  override def run(log: Logger[String], settings: MySettings): Task[Topology] =
     for {
       _ <- log.info(s"schemaRegistryUrl: ${settings.schemaRegistryUrl}")
       topology <- ZIO.effect {
