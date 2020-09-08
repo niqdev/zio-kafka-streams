@@ -52,14 +52,14 @@ object ToUpperCaseApp extends KafkaStreamsApp(MySettings.configLocalLayer) {
   // TODO wrap into a service ZConfig[MySettings] to make it more generic/flexible
   override def runApp: RIO[Logging with ZConfig[MySettings], Topology] =
     for {
-      _        <- log.info("TODO")
       settings <- ZIO.access[ZConfig[MySettings]](_.get)
-      topology <- ZSBuilder { builder =>
+      _        <- log.info(s"Running ${settings.applicationId}")
+      topology <- ZStreamsBuilder { builder =>
         for {
-          sourceStream    <- ZSBuilder.stream(builder, settings.sourceTopic)
+          sourceStream    <- builder.stream(settings.sourceTopic)
           upperCaseStream <- sourceStream.mapValues(_.toUpperCase)
-          t               <- upperCaseStream.to(settings.sinkTopic)
-        } yield t
+          _               <- upperCaseStream.to(settings.sinkTopic)
+        } yield ()
       }
     } yield topology
 }

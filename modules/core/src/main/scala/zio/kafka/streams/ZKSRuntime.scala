@@ -6,7 +6,7 @@ import zio._
 import zio.config._
 import zio.logging._
 
-// TODO KafkaStreamsSettings
+// TODO refactor KafkaStreamsSettings
 object ZKSRuntime {
   final type ZKSRuntime[T <: KafkaStreamsSettings] = Logging with ZConfig[T] with ZKSTopology
 
@@ -63,7 +63,7 @@ object ZKSRuntime {
       } yield ()
     }
 
-  // TODO retryN + repeat(Schedule)
+  // TODO retryN + repeat(Schedule) configurable
   // effectTotal ??? https://github.com/zio/zio-kafka/blob/master/src/main/scala/zio/kafka/admin/AdminClient.scala#L206
   private[this] def stop: KafkaStreams => URIO[Logging, Unit] =
     kafkaStreams =>

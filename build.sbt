@@ -24,8 +24,8 @@ lazy val commonSettings = Seq(
     "-language:existentials",
     "-language:higherKinds",
     "-language:implicitConversions",
-    "-Xlint"
-    //"-Wconf:any:error"
+    "-Xlint",
+    "-Wconf:any:error"
   )
 )
 

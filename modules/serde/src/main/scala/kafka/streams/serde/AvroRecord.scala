@@ -22,6 +22,17 @@ object AvroRecordConsumed {
         K.serde(schemaRegistry),
         V.serde(schemaRegistry)
       )
+
+  // TODO
+  implicit def avroRecordValueConsumed[K, V](
+    implicit K: Codec[K],
+    V: AvroCodec[V]
+  ): AvroRecordConsumed[K, V] =
+    schemaRegistry =>
+      Consumed.`with`[K, V](
+        K.serde,
+        V.serde(schemaRegistry)
+      )
 }
 
 /**

@@ -6,7 +6,7 @@ import zio._
 import zio.config._
 import zio.logging._
 
-// TODO remove constraint T <: KafkaStreamsSettings
+// TODO remove constraint T <: KafkaStreamsSettings and use service
 abstract class KafkaStreamsApp[T <: KafkaStreamsSettings: Tag](
   configLayer: Layer[ReadError[String], ZConfig[T]]
 ) extends App {
