@@ -15,6 +15,7 @@ abstract class KafkaStreamsApp[T <: KafkaStreamsSettings: Tag](
     kafkaStreamsApp.provideLayer(kafkaStreamsLayer).exitCode
 
   // TODO print all settings
+  // TODO >>> Logging with ZConfig[T] with ZKSTopology >>> KafkaStreamsEnv[T]
   private[this] final lazy val kafkaStreamsApp: RIO[Logging with ZConfig[T] with ZKSTopology, Unit] =
     for {
       settings <- ZIO.access[ZConfig[T]](_.get)

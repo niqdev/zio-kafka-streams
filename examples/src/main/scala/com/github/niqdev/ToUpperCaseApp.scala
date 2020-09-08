@@ -56,9 +56,9 @@ object ToUpperCaseApp extends KafkaStreamsApp(MySettings.configLocalLayer) {
       _        <- log.info(s"Running ${settings.applicationId}")
       topology <- ZStreamsBuilder { builder =>
         for {
-          sourceStream    <- builder.stream(settings.sourceTopic)
+          sourceStream    <- builder.streamWithLog(settings.sourceTopic)
           upperCaseStream <- sourceStream.mapValues(_.toUpperCase)
-          _               <- upperCaseStream.to(settings.sinkTopic)
+          _               <- upperCaseStream.toWithLog(settings.sinkTopic)
         } yield ()
       }
     } yield topology

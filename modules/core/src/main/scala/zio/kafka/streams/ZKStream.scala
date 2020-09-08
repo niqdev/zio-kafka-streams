@@ -2,6 +2,7 @@ package zio.kafka
 package streams
 
 import kafka.streams.serde._
+import org.apache.kafka.streams.kstream.Printed
 import org.apache.kafka.streams.scala.kstream.KStream
 import zio._
 
@@ -14,6 +15,15 @@ sealed abstract class ZKStream[K, V](private val stream: KStream[K, V]) {
     implicit P: RecordProduced[K, V]
   ): Task[Unit] =
     Task.effect(stream.to(topic)(P.produced))
+
+  // TODO debug enable in ZEnv?
+  def toWithLog(topic: String)(
+    implicit P: RecordProduced[K, V]
+  ): Task[Unit] =
+    Task.effect {
+      stream.print(Printed.toSysOut[K, V].withLabel(topic))
+      stream.to(topic)(P.produced)
+    }
 }
 
 object ZKStream {
