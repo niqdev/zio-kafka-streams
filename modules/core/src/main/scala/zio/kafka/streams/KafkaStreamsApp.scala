@@ -15,8 +15,7 @@ abstract class KafkaStreamsApp[T <: KafkaStreamsSettings: Tag](
     kafkaStreamsApp.provideLayer(kafkaStreamsLayer).exitCode
 
   // TODO print all settings
-  private[this] final lazy val kafkaStreamsApp
-    : ZIO[Logging with ZConfig[T] with ZKSTopology, Throwable, Unit] =
+  private[this] final lazy val kafkaStreamsApp: RIO[Logging with ZConfig[T] with ZKSTopology, Unit] =
     for {
       settings <- ZIO.access[ZConfig[T]](_.get)
       //_ <- log.info(s"${write(descriptor[T], settings).map(_.flattenString())}")
@@ -30,5 +29,5 @@ abstract class KafkaStreamsApp[T <: KafkaStreamsSettings: Tag](
   /**
     * TODO docs
     */
-  def runApp: ZIO[Logging with ZConfig[T], Throwable, Topology]
+  def runApp: RIO[Logging with ZConfig[T], Topology]
 }

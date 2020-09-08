@@ -1,11 +1,11 @@
 package com.github.niqdev
 
 import org.apache.kafka.streams.Topology
+import zio._
 import zio.config.ConfigDescriptor.string
 import zio.config._
 import zio.kafka.streams._
 import zio.logging._
-import zio._
 
 final case class MySettings(
   applicationId: String,
@@ -48,19 +48,18 @@ object MySettings {
 
 object ToUpperCaseApp extends KafkaStreamsApp(MySettings.configLocalLayer) {
 
-  // TODO ZKStream/ZKTable
+  // TODO logging should be only internal - different layer?
   // TODO wrap into a service ZConfig[MySettings] to make it more generic/flexible
-  override def runApp: ZIO[Logging with ZConfig[MySettings], Throwable, Topology] =
+  override def runApp: RIO[Logging with ZConfig[MySettings], Topology] =
     for {
       _        <- log.info("TODO")
       settings <- ZIO.access[ZConfig[MySettings]](_.get)
-      topology <- ZKStream.builder { builder =>
-        import org.apache.kafka.streams.scala.ImplicitConversions.{ consumedFromSerde, producedFromSerde }
-        import org.apache.kafka.streams.scala.Serdes.String
-
-        val sourceStream    = builder.stream[String, String](settings.sourceTopic)(consumedFromSerde)
-        val upperCaseStream = sourceStream.mapValues(_.toUpperCase())
-        upperCaseStream.to(settings.sinkTopic)(producedFromSerde)
+      topology <- ZSBuilder { builder =>
+        for {
+          sourceStream    <- ZSBuilder.stream(builder, settings.sourceTopic)
+          upperCaseStream <- sourceStream.mapValues(_.toUpperCase)
+          t               <- upperCaseStream.to(settings.sinkTopic)
+        } yield t
       }
     } yield topology
 }

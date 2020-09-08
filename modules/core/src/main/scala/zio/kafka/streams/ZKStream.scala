@@ -1,18 +1,23 @@
 package zio.kafka
 package streams
 
-import org.apache.kafka.streams.Topology
-import org.apache.kafka.streams.scala.StreamsBuilder
-import zio.logging.Logging
-import zio.{ RIO, ZIO }
+import kafka.streams.serde._
+import org.apache.kafka.streams.scala.kstream.KStream
+import zio._
+
+sealed abstract class ZKStream[K, V](private val kstream: KStream[K, V]) {
+
+  def mapValues[VO](f: V => VO): Task[ZKStream[K, VO]] =
+    ZKStream(kstream.mapValues(f))
+
+  def to(topic: String)(
+    implicit P: RecordProduced[K, V]
+  ): Task[Unit] =
+    Task.effect(kstream.to(topic)(P.produced))
+}
 
 object ZKStream {
 
-  // TODO RIO[Logging with T, StreamsBuilder] => Task[Unit]
-  def builder[T](f: StreamsBuilder => Unit): RIO[Logging with T, Topology] =
-    ZIO.effect {
-      val builder = new StreamsBuilder()
-      f(builder)
-      builder.build()
-    }
+  def apply[K, V](stream: KStream[K, V]): Task[ZKStream[K, V]] =
+    Task.effect(new ZKStream[K, V](stream) {})
 }
