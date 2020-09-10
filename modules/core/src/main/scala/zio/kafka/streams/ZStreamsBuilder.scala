@@ -1,33 +1,36 @@
-package zio.kafka.streams
+package zio.kafka
+package streams
 
-import kafka.streams.serde.RecordConsumed
+import kafka.streams.serde._
 import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.kstream.Printed
 import org.apache.kafka.streams.scala.StreamsBuilder
+import org.apache.kafka.streams.scala.kstream._
 import zio._
 
-// TODO refined dependency or not?
+// TODO Refined ?
 sealed abstract class ZStreamsBuilder(private val builder: StreamsBuilder) {
+
+  def streamConsumed[K, V](topic: String): Consumed[K, V] => RIO[Settings, ZKStream[K, V]] =
+    consumed =>
+      for {
+        settings <- Settings.config
+        stream <- ZKStream {
+          val stream = builder.stream(topic)(consumed)
+          if (settings.debug) stream.print(Printed.toSysOut[K, V].withLabel(topic))
+          stream
+        }
+      } yield stream
 
   def stream[K, V](topic: String)(
     implicit C: RecordConsumed[K, V]
-  ): Task[ZKStream[K, V]] =
-    ZKStream(builder.stream(topic)(C.consumed))
+  ): RIO[Settings, ZKStream[K, V]] =
+    streamConsumed(topic)(C.consumed)
 
-  // TODO debug enable in ZEnv?
-  def streamWithLog[K, V](topic: String)(
-    implicit C: RecordConsumed[K, V]
-  ): Task[ZKStream[K, V]] =
-    ZKStream {
-      val stream = builder.stream(topic)(C.consumed)
-      stream.print(Printed.toSysOut[K, V].withLabel(topic))
-      stream
-    }
-
-  def stream[K, V](topics: Set[String])(
-    implicit C: RecordConsumed[K, V]
-  ): Task[ZKStream[K, V]] =
-    ZKStream(builder.stream(topics)(C.consumed))
+  def streamAvro[K, V](topic: String)(
+    implicit C: AvroRecordConsumed[K, V]
+  ): RIO[Settings, ZKStream[K, V]] =
+    Settings.config.flatMap(settings => streamConsumed(topic)(C.consumed(settings.schemaRegistryUrl)))
 }
 
 object ZStreamsBuilder {
@@ -35,7 +38,7 @@ object ZStreamsBuilder {
   def newInstance: Task[ZStreamsBuilder] =
     Task.effect(new ZStreamsBuilder(new StreamsBuilder()) {})
 
-  // TODO RIO[Logging with ZConfig[T], Topology]
-  def apply(f: ZStreamsBuilder => Task[Unit]): Task[Topology] =
+  // TODO
+  def apply(f: ZStreamsBuilder => RIO[Settings, Unit]): RIO[Settings, Topology] =
     newInstance.flatMap(zsb => f(zsb) *> Task.effect(zsb.builder.build()))
 }

@@ -3,33 +3,28 @@ package streams
 
 import org.apache.kafka.streams.KafkaStreams
 import zio._
-import zio.config._
 import zio.logging._
 
-// TODO refactor KafkaStreamsSettings
 object ZKSRuntime {
-  final type ZKSRuntime[T <: KafkaStreamsSettings] = Logging with ZConfig[T] with ZKSTopology
 
   /**
-    * TODO docs
+    * Initialize Kafka Streams Runtime
     */
-  def make[T <: KafkaStreamsSettings: Tag]: ZManaged[ZKSRuntime[T], Throwable, KafkaStreams] =
-    ZManaged.make(setup[T])(stop)
+  def make: RManaged[KafkaStreamsEnv, KafkaStreams] =
+    ZManaged.make(setup)(stop)
 
-  private[this] def setup[T <: KafkaStreamsSettings: Tag]: ZIO[ZKSRuntime[T], Throwable, KafkaStreams] =
+  private[this] def setup: RIO[KafkaStreamsEnv, KafkaStreams] =
     for {
-      settings     <- ZIO.access[ZConfig[T]](_.get)
+      settings     <- Settings.config
       _            <- log.info("Build topology ...")
-      topology     <- ZKSTopology.buildTopology
+      topology     <- ZKSTopology.build
       _            <- log.info("Setup runtime ...")
       kafkaStreams <- ZIO.effect(new KafkaStreams(topology, settings.properties))
       _            <- log.info("Start runtime ...")
-      _            <- startKafkaStreams[T](kafkaStreams)
+      _            <- startKafkaStreams(kafkaStreams)
     } yield kafkaStreams
 
-  private[this] def startKafkaStreams[T <: KafkaStreamsSettings: Tag](
-    kafkaStreams: KafkaStreams
-  ): ZIO[ZKSRuntime[T], Throwable, KafkaStreams] =
+  private[this] def startKafkaStreams(kafkaStreams: KafkaStreams): RIO[KafkaStreamsEnv, KafkaStreams] =
     ZIO.effectAsyncM { callback =>
 
       def setupShutdownHandler =
@@ -43,7 +38,6 @@ object ZKSRuntime {
                 case KafkaStreams.State.ERROR =>
                   callback(IO.fail(new IllegalStateException("Shut down application in ERROR state")))
                 case KafkaStreams.State.NOT_RUNNING =>
-                  // TODO is this ok?
                   callback(IO.succeed(kafkaStreams))
                 case _ => ()
               }
@@ -63,16 +57,13 @@ object ZKSRuntime {
       } yield ()
     }
 
-  // TODO retryN + repeat(Schedule) configurable
-  // effectTotal ??? https://github.com/zio/zio-kafka/blob/master/src/main/scala/zio/kafka/admin/AdminClient.scala#L206
+  // TODO retryN + repeat(Schedule) configurable in Settings
   private[this] def stop: KafkaStreams => URIO[Logging, Unit] =
     kafkaStreams =>
-      for {
-        _ <- log.info("Stop runtime ...")
-        _ <-
-          ZIO
-            .effect(kafkaStreams.close(java.time.Duration.ofSeconds(2)))
-            .retryN(5)
-            .catchAll(_ => ZIO.unit)
-      } yield ()
+      log.info("Stop runtime ...") *> ZIO
+        .effect(kafkaStreams.close(java.time.Duration.ofSeconds(2)))
+        .retryN(5)
+        .catchAll(_ => ZIO.unit)
+        .flatMap(_ => ZIO.unit)
+
 }

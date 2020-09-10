@@ -3,32 +3,25 @@ package streams
 
 import org.apache.kafka.streams.Topology
 import zio._
-import zio.config._
 import zio.logging._
 
-// TODO remove constraint T <: KafkaStreamsSettings and use service
-abstract class KafkaStreamsApp[T <: KafkaStreamsSettings: Tag](
-  configLayer: Layer[ReadError[String], ZConfig[T]]
-) extends App {
+abstract class KafkaStreamsApp(settingsLayer: ULayer[Settings]) extends App {
 
   override def run(args: List[String]): URIO[ZEnv, ExitCode] =
     kafkaStreamsApp.provideLayer(kafkaStreamsLayer).exitCode
 
-  // TODO print all settings
-  // TODO >>> Logging with ZConfig[T] with ZKSTopology >>> KafkaStreamsEnv[T]
-  private[this] final lazy val kafkaStreamsApp: RIO[Logging with ZConfig[T] with ZKSTopology, Unit] =
+  private[this] final lazy val kafkaStreamsApp: RIO[KafkaStreamsEnv, Unit] =
     for {
-      settings <- ZIO.access[ZConfig[T]](_.get)
-      //_ <- log.info(s"${write(descriptor[T], settings).map(_.flattenString())}")
-      _ <- log.info(s"KafkaStreamsApp ${settings.applicationId}")
-      _ <- ZKSRuntime.make[T].useForever
+      settings <- Settings.config
+      _        <- log.info(s"AppSettings: $settings")
+      _        <- ZKSRuntime.make.useForever
     } yield ()
 
   private[this] final lazy val kafkaStreamsLayer =
-    Logging.console() ++ configLayer >+> ZKSTopology.make[T](runApp)
+    Logging.console() ++ settingsLayer >+> ZKSTopology.make(runApp)
 
   /**
-    * TODO docs
+    * Run Kafka Streams application
     */
-  def runApp: RIO[Logging with ZConfig[T], Topology]
+  def runApp: RIO[TopologyEnv, Topology]
 }

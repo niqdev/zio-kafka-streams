@@ -4,6 +4,7 @@ import org.apache.kafka.streams.Topology
 import zio._
 import zio.config.ConfigDescriptor.string
 import zio.config._
+import zio.kafka.streams.Settings.KafkaStreamsSettings
 import zio.kafka.streams._
 import zio.logging._
 
@@ -13,15 +14,9 @@ final case class MySettings(
   schemaRegistryUrl: String,
   sourceTopic: String,
   sinkTopic: String
-) extends KafkaStreamsSettings {
-  override def extraProperties: Map[String, AnyRef] =
-    Map.empty
-}
+) extends KafkaStreamsSettings
 object MySettings {
 
-  // example auto derivation
-//  final val configDescriptor0: ConfigDescriptor[MySettings] =
-//    descriptor[MySettings]
   final val configDescriptor: ConfigDescriptor[MySettings] =
     (string("APPLICATION_ID") |@|
       string("BOOTSTRAP_SERVERS") |@|
@@ -31,34 +26,41 @@ object MySettings {
       MySettings.apply,
       MySettings.unapply
     )
-  final val configEnvLayer: Layer[ReadError[String], ZConfig[MySettings]] =
-    ZConfig.fromSystemEnv(configDescriptor)
-  final val configLocalLayer: Layer[ReadError[String], ZConfig[MySettings]] =
-    ZConfig.fromMap(
+
+  val liveLocal = new Settings.Service[MySettings] {
+    private[this] val configMap =
       Map(
         "APPLICATION_ID"      -> "to-upper-case",
         "BOOTSTRAP_SERVERS"   -> "localhost:9092",
         "SCHEMA_REGISTRY_URL" -> "http://localhost:8081",
         "SOURCE_TOPIC"        -> "example.source.v1",
         "SINK_TOPIC"          -> "example.sink.v1"
-      ),
-      configDescriptor
-    )
+      )
+
+    override def config: Task[MySettings] =
+      ZIO.fromEither(read(configDescriptor from ConfigSource.fromMap(configMap)))
+  }
+
+  val liveEnv = new Settings.Service[MySettings] {
+    override def config: Task[MySettings] =
+      ConfigSource
+        .fromSystemEnv
+        .flatMap(configSource => ZIO.fromEither(read(configDescriptor from configSource)))
+  }
 }
 
-object ToUpperCaseApp extends KafkaStreamsApp(MySettings.configLocalLayer) {
+object ToUpperCaseApp extends KafkaStreamsApp(ZLayer.succeed(MySettings.liveLocal)) {
 
-  // TODO logging should be only internal - different layer?
-  // TODO wrap into a service ZConfig[MySettings] to make it more generic/flexible
-  override def runApp: RIO[Logging with ZConfig[MySettings], Topology] =
+  // TODO custom settings
+  override def runApp: RIO[Logging with Settings, Topology] =
     for {
-      settings <- ZIO.access[ZConfig[MySettings]](_.get)
+      settings <- Settings.config[MySettings]
       _        <- log.info(s"Running ${settings.applicationId}")
       topology <- ZStreamsBuilder { builder =>
         for {
-          sourceStream    <- builder.streamWithLog(settings.sourceTopic)
+          sourceStream    <- builder.stream[String, String](settings.sourceTopic)
           upperCaseStream <- sourceStream.mapValues(_.toUpperCase)
-          _               <- upperCaseStream.toWithLog(settings.sinkTopic)
+          _               <- upperCaseStream.to(settings.sinkTopic)
         } yield ()
       }
     } yield topology
