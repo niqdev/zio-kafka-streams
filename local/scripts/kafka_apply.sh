@@ -7,7 +7,7 @@ cd ${CURRENT_PATH}
 
 PARAM_ACTION=${1:?"Missing ACTION"}
 
-BOOTSTRAP_SERVER="kafka:9092"
+BOOTSTRAP_SERVERS="kafka:9092"
 
 ##############################
 
@@ -25,7 +25,7 @@ echo "[*] ACTION=${PARAM_ACTION}"
 case ${PARAM_ACTION} in
   "topic-list")
     kafka_exec "kafka-topics \
-      --bootstrap-server ${BOOTSTRAP_SERVER} \
+      --bootstrap-server ${BOOTSTRAP_SERVERS} \
       --list"
   ;;
   "topic-describe")
@@ -33,7 +33,7 @@ case ${PARAM_ACTION} in
     echo "[*] TOPIC_NAME=${PARAM_TOPIC_NAME}"
 
     kafka_exec "kafka-topics \
-      --bootstrap-server ${BOOTSTRAP_SERVER} \
+      --bootstrap-server ${BOOTSTRAP_SERVERS} \
       --describe \
       --topic ${PARAM_TOPIC_NAME}"
   ;;
@@ -43,7 +43,7 @@ case ${PARAM_ACTION} in
 
     # convention <MESSAGE_TYPE>.<DATASET_NAME>.<DATA_NAME>
     kafka_exec "kafka-topics \
-      --bootstrap-server ${BOOTSTRAP_SERVER} \
+      --bootstrap-server ${BOOTSTRAP_SERVERS} \
       --create \
       --replication-factor 1 \
       --partitions 1 \
@@ -54,7 +54,7 @@ case ${PARAM_ACTION} in
     echo "[*] TOPIC_NAME=${PARAM_TOPIC_NAME}"
 
     kafka_exec "kafka-topics \
-      --bootstrap-server ${BOOTSTRAP_SERVER} \
+      --bootstrap-server ${BOOTSTRAP_SERVERS} \
       --delete \
       --topic ${PARAM_TOPIC_NAME}"
   ;;
@@ -64,14 +64,14 @@ case ${PARAM_ACTION} in
 
     # view topic offset
     kafka_exec "kafka-run-class kafka.tools.GetOffsetShell \
-      --broker-list ${BOOTSTRAP_SERVER} \
+      --broker-list ${BOOTSTRAP_SERVERS} \
       --time -1 \
       --topic ${PARAM_TOPIC_NAME}"
   ;;
   # TODO not used
   "group-list")
     kafka_exec "kafka-consumer-groups \
-      --bootstrap-server ${BOOTSTRAP_SERVER} \
+      --bootstrap-server ${BOOTSTRAP_SERVERS} \
       --list"
   ;;
   # TODO not used
@@ -81,7 +81,7 @@ case ${PARAM_ACTION} in
 
     # view consumer group offset
     kafka_exec "kafka-consumer-groups \
-      --bootstrap-server ${BOOTSTRAP_SERVER} \
+      --bootstrap-server ${BOOTSTRAP_SERVERS} \
       --describe \
       --group ${PARAM_GROUP_NAME}"
   ;;
@@ -94,7 +94,7 @@ case ${PARAM_ACTION} in
 
     # TODO reset consumer group offset
     kafka_exec "kafka-consumer-groups \
-      --bootstrap-server ${BOOTSTRAP_SERVER} \
+      --bootstrap-server ${BOOTSTRAP_SERVERS} \
       --group ${PARAM_GROUP_NAME} \
       --topic ${PARAM_TOPIC_NAME} \
       --reset-offsets \
