@@ -1,6 +1,7 @@
 package kafka.streams.serde
 
 import com.sksamuel.avro4s.{ Decoder, Encoder, RecordFormat }
+import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig
 import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde
 import org.apache.kafka.common.serialization.Serde
@@ -11,20 +12,25 @@ import scala.jdk.CollectionConverters.MapHasAsJava
 // TODO @implicitNotFound
 trait AvroCodec[T] {
   // TODO String Refined Url vs String ?
-  def serde(schemaRegistry: String): Serde[T]
+  def serde(schemaRegistryUrl: String): Serde[T]
 }
 
 object AvroCodec {
   def apply[T](implicit ev: AvroCodec[T]): AvroCodec[T] = ev
 
-  // TODO allow to add more props e.g. strategy
-  def generic[T >: Null: Encoder: Decoder](isKey: Boolean): AvroCodec[T] =
-    schemaRegistry => {
+  def generic[T >: Null: Encoder: Decoder](
+    isKey: Boolean,
+    serdeConfig: Map[String, AnyRef] = Map.empty,
+    schemaRegistryClient: Option[String => SchemaRegistryClient] = None
+  ): AvroCodec[T] =
+    schemaRegistryUrl => {
 
       val recordFormat = RecordFormat[T]
-      val props        = Map(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG -> schemaRegistry).asJava
-      val serde        = new GenericAvroSerde()
-      serde.configure(props, isKey)
+      val schemaRegistryConfig =
+        AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG -> schemaRegistryUrl
+      val serde =
+        schemaRegistryClient.fold(new GenericAvroSerde)(f => new GenericAvroSerde(f(schemaRegistryUrl)))
+      serde.configure((serdeConfig + schemaRegistryConfig).asJava, isKey)
 
       val serializer: (String, T) => Array[Byte] =
         (topic, data) => serde.serializer().serialize(topic, recordFormat.to(data))
