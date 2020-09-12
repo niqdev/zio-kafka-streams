@@ -7,7 +7,7 @@ trait Codec[T] {
   def serde: Serde[T]
 }
 
-// TODO Circe Json + all Serdes + Refined
+// TODO circe/zio-json + xml-spac + all common serdes + Refined
 object Codec {
   def apply[T](implicit ev: Codec[T]): Codec[T] = ev
 

@@ -15,7 +15,7 @@ object ZKSTopology {
     def build: Task[Topology]
   }
 
-  def make(effect: RIO[TopologyEnv, Topology]): RLayer[TopologyEnv, ZKSTopology] =
+  def make[T](effect: RIO[T, Topology]): RLayer[T, ZKSTopology] =
     effect
       .mapEffect(topology =>
         new Service {

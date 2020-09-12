@@ -1,27 +1,22 @@
 package zio.kafka
 package streams
 
-import org.apache.kafka.streams.Topology
 import zio._
-import zio.logging._
+import zio.console._
 
-abstract class KafkaStreamsApp(settingsLayer: ULayer[Settings]) extends App {
+abstract class KafkaStreamsApp(topologyLayer: ZLayer[ZEnv, Throwable, Settings with ZKSTopology])
+    extends App {
 
   override def run(args: List[String]): URIO[ZEnv, ExitCode] =
     kafkaStreamsApp.provideLayer(kafkaStreamsLayer).exitCode
 
-  private[this] final lazy val kafkaStreamsApp: RIO[KafkaStreamsEnv, Unit] =
+  private[this] final lazy val kafkaStreamsApp: RIO[Console with Settings with ZKSTopology, Unit] =
     for {
-      settings <- Settings.config
-      _        <- log.info(s"AppSettings: $settings")
+      settings <- Settings.settings
+      _        <- putStr(settings.prettyPrint)
       _        <- ZKSRuntime.make.useForever
     } yield ()
 
   private[this] final lazy val kafkaStreamsLayer =
-    Logging.console() ++ settingsLayer >+> ZKSTopology.make(runApp)
-
-  /**
-    * Run Kafka Streams application
-    */
-  def runApp: RIO[TopologyEnv, Topology]
+    Console.live ++ topologyLayer
 }

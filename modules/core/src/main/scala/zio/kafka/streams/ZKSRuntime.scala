@@ -3,28 +3,28 @@ package streams
 
 import org.apache.kafka.streams.KafkaStreams
 import zio._
-import zio.logging._
+import zio.console._
 
 object ZKSRuntime {
 
   /**
     * Initialize Kafka Streams Runtime
     */
-  def make: RManaged[KafkaStreamsEnv, KafkaStreams] =
+  def make: RManaged[Console with Settings with ZKSTopology, KafkaStreams] =
     ZManaged.make(setup)(stop)
 
-  private[this] def setup: RIO[KafkaStreamsEnv, KafkaStreams] =
+  private[this] def setup: RIO[Console with Settings with ZKSTopology, KafkaStreams] =
     for {
-      settings     <- Settings.config
-      _            <- log.info("Build topology ...")
+      _            <- putStrLn("Build topology ...")
       topology     <- ZKSTopology.build
-      _            <- log.info("Setup runtime ...")
-      kafkaStreams <- ZIO.effect(new KafkaStreams(topology, settings.properties))
-      _            <- log.info("Start runtime ...")
+      _            <- putStrLn("Setup runtime ...")
+      properties   <- Settings.settings.flatMap(_.toJavaProperties)
+      kafkaStreams <- ZIO.effect(new KafkaStreams(topology, properties))
+      _            <- putStrLn("Start runtime ...")
       _            <- startKafkaStreams(kafkaStreams)
     } yield kafkaStreams
 
-  private[this] def startKafkaStreams(kafkaStreams: KafkaStreams): RIO[KafkaStreamsEnv, KafkaStreams] =
+  private[this] def startKafkaStreams(kafkaStreams: KafkaStreams): Task[KafkaStreams] =
     ZIO.effectAsyncM { callback =>
 
       def setupShutdownHandler =
@@ -58,12 +58,16 @@ object ZKSRuntime {
     }
 
   // TODO retryN + repeat(Schedule) configurable in Settings
-  private[this] def stop: KafkaStreams => URIO[Logging, Unit] =
+  // TODO duration
+  private[this] def stop: KafkaStreams => URIO[Console with Settings, Unit] =
     kafkaStreams =>
-      log.info("Stop runtime ...") *> ZIO
-        .effect(kafkaStreams.close(java.time.Duration.ofSeconds(2)))
-        .retryN(5)
-        .catchAll(_ => ZIO.unit)
-        .flatMap(_ => ZIO.unit)
+      (for {
+        _        <- putStrLn("Stop runtime ...")
+        settings <- Settings.settings
+        _ <-
+          Task
+            .effect(kafkaStreams.close(java.time.Duration.ofSeconds(settings.shutdownTimeout)))
+            .retryN(5)
+      } yield ()).catchAll(_ => ZIO.unit)
 
 }

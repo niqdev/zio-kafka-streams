@@ -14,7 +14,7 @@ sealed abstract class ZStreamsBuilder(private val builder: StreamsBuilder) {
   def streamConsumed[K, V](topic: String): Consumed[K, V] => RIO[Settings, ZKStream[K, V]] =
     consumed =>
       for {
-        settings <- Settings.config
+        settings <- Settings.settings
         stream <- ZKStream {
           val stream = builder.stream(topic)(consumed)
           if (settings.debug) stream.print(Printed.toSysOut[K, V].withLabel(topic))
@@ -27,10 +27,11 @@ sealed abstract class ZStreamsBuilder(private val builder: StreamsBuilder) {
   ): RIO[Settings, ZKStream[K, V]] =
     streamConsumed(topic)(C.consumed)
 
+  // TODO schemaRegistryUrl.get
   def streamAvro[K, V](topic: String)(
     implicit C: AvroRecordConsumed[K, V]
   ): RIO[Settings, ZKStream[K, V]] =
-    Settings.config.flatMap(settings => streamConsumed(topic)(C.consumed(settings.schemaRegistryUrl)))
+    Settings.settings.flatMap(settings => streamConsumed(topic)(C.consumed(settings.schemaRegistryUrl.get)))
 }
 
 object ZStreamsBuilder {

@@ -14,22 +14,23 @@ sealed abstract class ZKStream[K, V](private val stream: KStream[K, V]) {
   def toProduced(topic: String): Produced[K, V] => RIO[Settings, Unit] =
     produced =>
       for {
-        settings <- Settings.config
+        settings <- Settings.settings
         _ <- Task.effect {
           if (settings.debug) stream.print(Printed.toSysOut[K, V].withLabel(topic))
           stream.to(topic)(produced)
         }
-      } yield stream
+      } yield ()
 
   def to(topic: String)(
     implicit P: RecordProduced[K, V]
   ): RIO[Settings, Unit] =
     toProduced(topic)(P.produced)
 
+  // TODO schemaRegistryUrl.get
   def toAvro(topic: String)(
     implicit P: AvroRecordProduced[K, V]
   ): RIO[Settings, Unit] =
-    Settings.config.flatMap(settings => toProduced(topic)(P.produced(settings.schemaRegistryUrl)))
+    Settings.settings.flatMap(settings => toProduced(topic)(P.produced(settings.schemaRegistryUrl.get)))
 }
 
 object ZKStream {
