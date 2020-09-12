@@ -8,8 +8,12 @@ import zio.config._
 import zio.kafka.streams._
 import zio.logging._
 
-object ToUpperCaseTopology {
+/**
+  * ToUpperCase kafka Streams application
+  */
+object ToUpperCaseApp extends KafkaStreamsApp(ToUpperCaseTopology.layer)
 
+object ToUpperCaseTopology {
   private[this] lazy val app: RIO[KafkaStreamsConfig with CustomConfig with Logging, Topology] =
     for {
       config      <- KafkaStreamsConfig.config
@@ -30,8 +34,6 @@ object ToUpperCaseTopology {
     Logging.console() ++ ToUpperCaseConfig.localLayer >>> KafkaStreamsTopology.make(app) ++
       ToUpperCaseConfig.localConfigLayer
 }
-
-object ToUpperCaseApp extends KafkaStreamsApp(ToUpperCaseTopology.layer)
 
 final case class ToUpperCaseConfig(
   applicationId: String,
@@ -76,6 +78,9 @@ object ToUpperCaseConfig {
         debug = true
       )
 
+  /*
+   * Local configurations
+   */
   private[this] lazy val localConfig: IO[ReadError[String], ToUpperCaseConfig] = {
     val configMap =
       Map(
@@ -87,18 +92,9 @@ object ToUpperCaseConfig {
       )
     ZIO.fromEither(read(configDescriptor from ConfigSource.fromMap(configMap)))
   }
-
-  private[this] lazy val envConfig =
-    ConfigSource
-      .fromSystemEnv
-      .flatMap(configSource => ZIO.fromEither(read(configDescriptor from configSource)))
-
-  lazy val localConfigLayer =
-    ZLayer.succeed(new KafkaStreamsConfig.Service {
-      override def config: Task[AppConfig] =
-        localConfig.map(toAppConfig)
-    })
-  lazy val localCustomLayer =
+  lazy val localConfigLayer: ULayer[KafkaStreamsConfig] =
+    KafkaStreamsConfig.make(localConfig.map(toAppConfig))
+  lazy val localCustomConfigLayer =
     ZLayer.succeed(new CustomConfig.Service {
       override def sourceTopic: Task[String] =
         localConfig.map(_.sourceTopic)
@@ -114,12 +110,16 @@ object ToUpperCaseConfig {
           .absorb
     })
 
+  /*
+   * Env configurations
+   */
+  private[this] lazy val envConfig =
+    ConfigSource
+      .fromSystemEnv
+      .flatMap(configSource => ZIO.fromEither(read(configDescriptor from configSource)))
   lazy val envConfigLayer =
-    ZLayer.succeed(new KafkaStreamsConfig.Service {
-      override def config: Task[AppConfig] =
-        envConfig.map(toAppConfig)
-    })
-  lazy val envCustomLayer =
+    KafkaStreamsConfig.make(envConfig.map(toAppConfig))
+  lazy val envCustomConfigLayer =
     ZLayer.succeed(new CustomConfig.Service {
       override def sourceTopic: Task[String] =
         envConfig.map(_.sourceTopic)
@@ -135,6 +135,6 @@ object ToUpperCaseConfig {
           .absorb
     })
 
-  lazy val localLayer = localConfigLayer ++ localCustomLayer
-  lazy val envLayer   = envConfigLayer ++ envCustomLayer
+  lazy val localLayer = localConfigLayer ++ localCustomConfigLayer
+  lazy val envLayer   = envConfigLayer ++ envCustomConfigLayer
 }

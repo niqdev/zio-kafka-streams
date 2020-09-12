@@ -16,6 +16,11 @@ object KafkaStreamsConfig {
     def config: Task[AppConfig]
   }
 
+  def make(appConfig: => Task[AppConfig]): ULayer[KafkaStreamsConfig] =
+    ZLayer.succeed(new KafkaStreamsConfig.Service {
+      override def config: Task[AppConfig] = appConfig
+    })
+
   def config: RIO[KafkaStreamsConfig, AppConfig] =
     ZIO.accessM[KafkaStreamsConfig](_.get.config)
 }
