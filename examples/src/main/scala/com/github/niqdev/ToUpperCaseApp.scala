@@ -35,10 +35,12 @@ object ToUpperCaseTopology {
       ToUpperCaseConfig.localConfigLayer
 }
 
+// TODO refined/newtype
 final case class ToUpperCaseConfig(
   applicationId: String,
   bootstrapServers: String,
   schemaRegistryUrl: String,
+  logLevel: String,
   sourceTopic: String,
   sinkTopic: String
 )
@@ -64,6 +66,7 @@ object ToUpperCaseConfig {
     (string("APPLICATION_ID") |@|
       string("BOOTSTRAP_SERVERS") |@|
       string("SCHEMA_REGISTRY_URL") |@|
+      string("LOG_LEVEL") |@|
       string("SOURCE_TOPIC") |@|
       string("SINK_TOPIC"))(
       ToUpperCaseConfig.apply,
@@ -87,6 +90,7 @@ object ToUpperCaseConfig {
         "APPLICATION_ID"      -> "to-upper-case",
         "BOOTSTRAP_SERVERS"   -> "localhost:9092",
         "SCHEMA_REGISTRY_URL" -> "http://localhost:8081",
+        "LOG_LEVEL"           -> "INFO",
         "SOURCE_TOPIC"        -> "example.source.v1",
         "SINK_TOPIC"          -> "example.sink.v1"
       )
@@ -104,6 +108,7 @@ object ToUpperCaseConfig {
         localConfig
           .flatMap(values => UIO(s"""
                |LOCAL custom configurations
+               |LOG_LEVEL: ${values.logLevel}
                |SOURCE_TOPIC: ${values.sourceTopic}
                |SINK_TOPIC: ${values.sinkTopic}
                |""".stripMargin))
@@ -129,6 +134,7 @@ object ToUpperCaseConfig {
         envConfig
           .flatMap(values => UIO(s"""
                |ENV custom configurations
+               |LOG_LEVEL: ${values.logLevel}
                |SOURCE_TOPIC: ${values.sourceTopic}
                |SINK_TOPIC: ${values.sinkTopic}
                |""".stripMargin))
