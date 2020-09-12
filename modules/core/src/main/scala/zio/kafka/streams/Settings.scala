@@ -41,9 +41,13 @@ final case class AppSettings(
       props
     })
 
-  // TODO
   def prettyPrint: String =
-    properties.iterator.mkString("\n")
+    s"""
+       |Application Settings:
+       |\tdebug = $debug
+       |\tshutdownTimeout = $shutdownTimeout
+       |${properties.foldLeft("")((output, kv) => output + s"\t${kv._1} = ${kv._2}\n")}
+       |""".stripMargin
 }
 object AppSettings {
   def apply(

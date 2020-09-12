@@ -4,8 +4,9 @@ package streams
 import zio._
 import zio.console._
 
-abstract class KafkaStreamsApp(topologyLayer: ZLayer[ZEnv, Throwable, Settings with ZKSTopology])
-    extends App {
+abstract class KafkaStreamsApp(
+  topologyLayer: ZLayer[ZEnv, Throwable, Settings with ZKSTopology]
+) extends App {
 
   override def run(args: List[String]): URIO[ZEnv, ExitCode] =
     kafkaStreamsApp.provideLayer(kafkaStreamsLayer).exitCode
