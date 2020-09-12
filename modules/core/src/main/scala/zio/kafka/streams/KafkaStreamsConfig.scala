@@ -11,7 +11,7 @@ object KafkaStreamsConfig {
   trait Service {
 
     /**
-      * Kafka Streams Application configurations
+      * Kafka Streams app configurations
       */
     def config: Task[AppConfig]
   }
@@ -23,10 +23,20 @@ object KafkaStreamsConfig {
 
   def config: RIO[KafkaStreamsConfig, AppConfig] =
     ZIO.accessM[KafkaStreamsConfig](_.get.config)
+
+  def requiredSchemaRegistryUrl: RIO[KafkaStreamsConfig, String] =
+    for {
+      values <- ZIO.accessM[KafkaStreamsConfig](_.get.config)
+      schemaRegistryUrl <-
+        values
+          .schemaRegistryUrl
+          .fold[Task[String]](Task.fail(new IllegalArgumentException("Missing schemaRegistryUrl")))(value =>
+            Task.succeed(value)
+          )
+    } yield schemaRegistryUrl
 }
 
 // TODO Refined ?
-// TODO schemaRegistryUrl: Option[String]
 final case class AppConfig(
   applicationId: String,
   bootstrapServers: String,

@@ -8,7 +8,6 @@ import org.apache.kafka.streams.scala.StreamsBuilder
 import org.apache.kafka.streams.scala.kstream._
 import zio._
 
-// TODO Refined ?
 sealed abstract class ZStreamsBuilder(private val builder: StreamsBuilder) {
 
   def streamConsumed[K, V](topic: String): Consumed[K, V] => RIO[KafkaStreamsConfig, ZKStream[K, V]] =
@@ -27,13 +26,12 @@ sealed abstract class ZStreamsBuilder(private val builder: StreamsBuilder) {
   ): RIO[KafkaStreamsConfig, ZKStream[K, V]] =
     streamConsumed(topic)(C.consumed)
 
-  // TODO schemaRegistryUrl.get
   def streamAvro[K, V](topic: String)(
     implicit C: AvroRecordConsumed[K, V]
   ): RIO[KafkaStreamsConfig, ZKStream[K, V]] =
     KafkaStreamsConfig
-      .config
-      .flatMap(settings => streamConsumed(topic)(C.consumed(settings.schemaRegistryUrl.get)))
+      .requiredSchemaRegistryUrl
+      .flatMap(schemaRegistryUrl => streamConsumed(topic)(C.consumed(schemaRegistryUrl)))
 }
 
 object ZStreamsBuilder {
@@ -41,7 +39,6 @@ object ZStreamsBuilder {
   def newInstance: Task[ZStreamsBuilder] =
     Task.effect(new ZStreamsBuilder(new StreamsBuilder()) {})
 
-  // TODO
   def apply(f: ZStreamsBuilder => RIO[KafkaStreamsConfig, Unit]): RIO[KafkaStreamsConfig, Topology] =
     newInstance.flatMap(zsb => f(zsb) *> Task.effect(zsb.builder.build()))
 }

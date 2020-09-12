@@ -26,13 +26,12 @@ sealed abstract class ZKStream[K, V](private val stream: KStream[K, V]) {
   ): RIO[KafkaStreamsConfig, Unit] =
     toProduced(topic)(P.produced)
 
-  // TODO schemaRegistryUrl.get
   def toAvro(topic: String)(
     implicit P: AvroRecordProduced[K, V]
   ): RIO[KafkaStreamsConfig, Unit] =
     KafkaStreamsConfig
-      .config
-      .flatMap(settings => toProduced(topic)(P.produced(settings.schemaRegistryUrl.get)))
+      .requiredSchemaRegistryUrl
+      .flatMap(schemaRegistryUrl => toProduced(topic)(P.produced(schemaRegistryUrl)))
 }
 
 object ZKStream {
