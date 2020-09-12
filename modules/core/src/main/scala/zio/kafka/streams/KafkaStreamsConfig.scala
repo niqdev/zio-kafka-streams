@@ -5,19 +5,24 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig
 import org.apache.kafka.streams.StreamsConfig
 import zio._
 
-// TODO Refined ?
-object Settings {
-  type Settings = Has[Settings.Service]
+object KafkaStreamsConfig {
+  type KafkaStreamsConfig = Has[KafkaStreamsConfig.Service]
 
   trait Service {
-    def settings: Task[AppSettings]
+
+    /**
+      * Kafka Streams Application configurations
+      */
+    def config: Task[AppConfig]
   }
 
-  def settings: RIO[Settings, AppSettings] =
-    ZIO.accessM[Settings](_.get.settings)
+  def config: RIO[KafkaStreamsConfig, AppConfig] =
+    ZIO.accessM[KafkaStreamsConfig](_.get.config)
 }
 
-final case class AppSettings(
+// TODO Refined ?
+// TODO schemaRegistryUrl: Option[String]
+final case class AppConfig(
   applicationId: String,
   bootstrapServers: String,
   schemaRegistryUrl: Option[String],
@@ -26,13 +31,13 @@ final case class AppSettings(
   private val properties: Map[String, AnyRef]
 ) {
 
-  def withProperty(key: String, value: AnyRef): AppSettings =
+  def withProperty(key: String, value: AnyRef): AppConfig =
     copy(properties = properties + (key -> value))
 
-  def withProperties(props: (String, AnyRef)*): AppSettings =
+  def withProperties(props: (String, AnyRef)*): AppConfig =
     withProperties(props.toMap)
 
-  def withProperties(props: Map[String, AnyRef]): AppSettings =
+  def withProperties(props: Map[String, AnyRef]): AppConfig =
     copy(properties = properties ++ props)
 
   def toJavaProperties: Task[java.util.Properties] =
@@ -43,20 +48,21 @@ final case class AppSettings(
 
   def prettyPrint: String =
     s"""
-       |Application Settings:
-       |\tdebug = $debug
-       |\tshutdownTimeout = $shutdownTimeout
+       |Application properties:
        |${properties.foldLeft("")((output, kv) => output + s"\t${kv._1} = ${kv._2}\n")}
-       |""".stripMargin
+       |Other configurations:
+       |\tdebug = $debug
+       |\tshutdownTimeout = $shutdownTimeout seconds
+       |\n""".stripMargin
 }
-object AppSettings {
+object AppConfig {
   def apply(
     applicationId: String,
     bootstrapServers: String,
     schemaRegistryUrl: Option[String] = None,
-    shutdownTimeout: Long = 5,
+    shutdownTimeout: Long = 5, // seconds
     debug: Boolean = false
-  ): AppSettings = {
+  ): AppConfig = {
     val baseProps = Map(
       StreamsConfig.APPLICATION_ID_CONFIG    -> applicationId,
       StreamsConfig.BOOTSTRAP_SERVERS_CONFIG -> bootstrapServers
@@ -64,6 +70,6 @@ object AppSettings {
     val props = schemaRegistryUrl.fold(baseProps)(url =>
       baseProps + (AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG -> url)
     )
-    AppSettings(applicationId, bootstrapServers, schemaRegistryUrl, shutdownTimeout, debug, props)
+    AppConfig(applicationId, bootstrapServers, schemaRegistryUrl, shutdownTimeout, debug, props)
   }
 }

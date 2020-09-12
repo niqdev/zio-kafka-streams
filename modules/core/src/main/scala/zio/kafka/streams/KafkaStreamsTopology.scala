@@ -4,8 +4,8 @@ package streams
 import org.apache.kafka.streams.Topology
 import zio._
 
-object ZKSTopology {
-  type ZKSTopology = Has[ZKSTopology.Service]
+object KafkaStreamsTopology {
+  type KafkaStreamsTopology = Has[KafkaStreamsTopology.Service]
 
   trait Service {
 
@@ -15,7 +15,7 @@ object ZKSTopology {
     def build: Task[Topology]
   }
 
-  def make[T](effect: RIO[T, Topology]): RLayer[T, ZKSTopology] =
+  def make[T](effect: RIO[T, Topology]): RLayer[T, KafkaStreamsTopology] =
     effect
       .mapEffect(topology =>
         new Service {
@@ -25,6 +25,6 @@ object ZKSTopology {
       )
       .toLayer
 
-  def build: RIO[ZKSTopology, Topology] =
-    ZIO.accessM[ZKSTopology](_.get.build)
+  def build: RIO[KafkaStreamsTopology, Topology] =
+    ZIO.accessM[KafkaStreamsTopology](_.get.build)
 }

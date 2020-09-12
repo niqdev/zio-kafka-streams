@@ -11,26 +11,28 @@ sealed abstract class ZKStream[K, V](private val stream: KStream[K, V]) {
   def mapValues[VO](f: V => VO): Task[ZKStream[K, VO]] =
     ZKStream(stream.mapValues(f))
 
-  def toProduced(topic: String): Produced[K, V] => RIO[Settings, Unit] =
+  def toProduced(topic: String): Produced[K, V] => RIO[KafkaStreamsConfig, Unit] =
     produced =>
       for {
-        settings <- Settings.settings
+        config <- KafkaStreamsConfig.config
         _ <- Task.effect {
-          if (settings.debug) stream.print(Printed.toSysOut[K, V].withLabel(topic))
+          if (config.debug) stream.print(Printed.toSysOut[K, V].withLabel(topic))
           stream.to(topic)(produced)
         }
       } yield ()
 
   def to(topic: String)(
     implicit P: RecordProduced[K, V]
-  ): RIO[Settings, Unit] =
+  ): RIO[KafkaStreamsConfig, Unit] =
     toProduced(topic)(P.produced)
 
   // TODO schemaRegistryUrl.get
   def toAvro(topic: String)(
     implicit P: AvroRecordProduced[K, V]
-  ): RIO[Settings, Unit] =
-    Settings.settings.flatMap(settings => toProduced(topic)(P.produced(settings.schemaRegistryUrl.get)))
+  ): RIO[KafkaStreamsConfig, Unit] =
+    KafkaStreamsConfig
+      .config
+      .flatMap(settings => toProduced(topic)(P.produced(settings.schemaRegistryUrl.get)))
 }
 
 object ZKStream {

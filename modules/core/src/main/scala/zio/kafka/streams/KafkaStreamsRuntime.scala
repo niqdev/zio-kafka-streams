@@ -5,20 +5,20 @@ import org.apache.kafka.streams.KafkaStreams
 import zio._
 import zio.console._
 
-object ZKSRuntime {
+object KafkaStreamsRuntime {
 
   /**
     * Initialize Kafka Streams Runtime
     */
-  def make: RManaged[Console with Settings with ZKSTopology, KafkaStreams] =
+  def make: RManaged[Console with KafkaStreamsConfig with KafkaStreamsTopology, KafkaStreams] =
     ZManaged.make(setup)(stop)
 
-  private[this] def setup: RIO[Console with Settings with ZKSTopology, KafkaStreams] =
+  private[this] def setup: RIO[Console with KafkaStreamsConfig with KafkaStreamsTopology, KafkaStreams] =
     for {
       _            <- putStrLn("Build topology ...")
-      topology     <- ZKSTopology.build
+      topology     <- KafkaStreamsTopology.build
       _            <- putStrLn("Setup runtime ...")
-      properties   <- Settings.settings.flatMap(_.toJavaProperties)
+      properties   <- KafkaStreamsConfig.config.flatMap(_.toJavaProperties)
       kafkaStreams <- ZIO.effect(new KafkaStreams(topology, properties))
       _            <- putStrLn("Start runtime ...")
       _            <- startKafkaStreams(kafkaStreams)
@@ -59,14 +59,14 @@ object ZKSRuntime {
 
   // TODO retryN + repeat(Schedule) configurable in Settings
   // TODO duration
-  private[this] def stop: KafkaStreams => URIO[Console with Settings, Unit] =
+  private[this] def stop: KafkaStreams => URIO[Console with KafkaStreamsConfig, Unit] =
     kafkaStreams =>
       (for {
-        _        <- putStrLn("Stop runtime ...")
-        settings <- Settings.settings
+        _      <- putStrLn("Stop runtime ...")
+        config <- KafkaStreamsConfig.config
         _ <-
           Task
-            .effect(kafkaStreams.close(java.time.Duration.ofSeconds(settings.shutdownTimeout)))
+            .effect(kafkaStreams.close(java.time.Duration.ofSeconds(config.shutdownTimeout)))
             .retryN(5)
       } yield ()).catchAll(_ => ZIO.unit)
 

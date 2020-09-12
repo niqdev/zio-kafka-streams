@@ -1,6 +1,6 @@
 package zio.kafka
 
 package object streams {
-  final type ZKSTopology = ZKSTopology.ZKSTopology
-  final type Settings    = Settings.Settings
+  final type KafkaStreamsTopology = KafkaStreamsTopology.KafkaStreamsTopology
+  final type KafkaStreamsConfig   = KafkaStreamsConfig.KafkaStreamsConfig
 }
