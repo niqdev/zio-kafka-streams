@@ -61,7 +61,7 @@ LOG_LEVEL="INFO" sbt "examples/runMain com.github.niqdev.ToUpperCaseApp"
 docker exec -it local-kafka bash
 
 # publish messages
-kafka-console-producer --broker-list kafka:9092 --topic example.source.v1
+kafka-console-producer --bootstrap-server kafka:9092 --topic example.source.v1
 
 # consume messages
 kafka-console-consumer --bootstrap-server kafka:9092 --topic example.sink.v1
@@ -108,9 +108,6 @@ object GitHubTopology {
 # start containers in background
 # zookeeper|kafka|kafka-rest|kafka-ui|schema-registry|schema-registry-ui
 make local-up
-
-# run app locally
-make local-run
 
 # stop all containers
 make local-down

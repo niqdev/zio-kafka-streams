@@ -10,10 +10,10 @@ import zio._
 // TODO incomplete
 sealed abstract class ZKStream[K, V](private val stream: KStream[K, V]) {
 
-  def mapKeys[KO](f: K => KO): Task[ZKStream[KO, V]] =
+  def mapKey[KO](f: K => KO): Task[ZKStream[KO, V]] =
     ZKStream(stream.map((key, value) => f(key) -> value))
 
-  def mapValues[VO](f: V => VO): Task[ZKStream[K, VO]] =
+  def mapValue[VO](f: V => VO): Task[ZKStream[K, VO]] =
     ZKStream(stream.mapValues(f))
 
   def map[KO, VO](f: (K, V) => (KO, VO)): Task[ZKStream[KO, VO]] =

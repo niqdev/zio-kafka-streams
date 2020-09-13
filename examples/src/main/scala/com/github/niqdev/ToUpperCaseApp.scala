@@ -21,7 +21,7 @@ object ToUpperCaseTopology {
       topology <- ZStreamsBuilder { builder =>
         for {
           sourceStream <- builder.stream[String, String](sourceTopic)
-          sinkStream   <- sourceStream.mapValues(_.toUpperCase)
+          sinkStream   <- sourceStream.mapValue(_.toUpperCase)
           _            <- sinkStream.to(sinkTopic)
         } yield ()
       }

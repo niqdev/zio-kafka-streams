@@ -65,15 +65,14 @@ lazy val examples = project
       "-Ymacro-annotations"
     ),
     libraryDependencies ++= Seq(
-      "dev.zio"             %% "zio-logging"         % V.zioLogging,
-      "dev.zio"             %% "zio-config"          % V.zioConfig,
-      "dev.zio"             %% "zio-config-magnolia" % V.zioConfig,
-      "dev.zio"             %% "zio-config-refined"  % V.zioConfig,
-      "eu.timepit"          %% "refined"             % V.refined,
-      "com.sksamuel.avro4s" %% "avro4s-refined"      % V.avro4s,
-      "io.estatico"         %% "newtype"             % V.newtype,
-      "com.beachape"        %% "enumeratum"          % V.enumeratum,
-      "ch.qos.logback"       % "logback-classic"     % V.logback % Runtime
+      "dev.zio"             %% "zio-logging"        % V.zioLogging,
+      "dev.zio"             %% "zio-config"         % V.zioConfig,
+      "dev.zio"             %% "zio-config-refined" % V.zioConfig,
+      "eu.timepit"          %% "refined"            % V.refined,
+      "com.sksamuel.avro4s" %% "avro4s-refined"     % V.avro4s,
+      "io.estatico"         %% "newtype"            % V.newtype,
+      "com.beachape"        %% "enumeratum"         % V.enumeratum,
+      "ch.qos.logback"       % "logback-classic"    % V.logback % Runtime
     )
   )
 

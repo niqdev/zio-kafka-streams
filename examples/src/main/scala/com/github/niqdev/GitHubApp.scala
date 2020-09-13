@@ -30,8 +30,8 @@ object GitHubTopology {
         for {
           userStream         <- builder.streamAvro[UserKey, UserValue](topics.userSource)
           repositoryStream   <- builder.streamAvro[RepositoryKey, RepositoryValue](topics.repositorySource)
-          ghUserStream       <- userStream.mapKeys(GitHubEventKey.fromUser)
-          ghRepositoryStream <- repositoryStream.mapKeys(GitHubEventKey.fromRepository)
+          ghUserStream       <- userStream.mapKey(GitHubEventKey.fromUser)
+          ghRepositoryStream <- repositoryStream.mapKey(GitHubEventKey.fromRepository)
           ghUserTable        <- ghUserStream.toTableAvro
           ghRepositoryTable  <- ghRepositoryStream.toTableAvro
           gitHubTable        <- ghUserTable.joinAvro(ghRepositoryTable)(GitHubEventValue.joinUserRepository)
