@@ -42,7 +42,7 @@ object GitHubTopology {
     } yield topology
 
   val layer: RLayer[ZEnv, KafkaStreamsTopology with KafkaStreamsConfig] =
-    Logging.console() ++ GitHubConfig.localLayer >+> KafkaStreamsTopology.make(topology)
+    Logging.console() ++ GitHubConfig.envLayer >+> KafkaStreamsTopology.make(topology)
 }
 
 /*
@@ -119,9 +119,9 @@ object GitHubConfig {
       )
     ZIO.fromEither(read(configDescriptor from ConfigSource.fromMap(configMap)))
   }
-  lazy val localConfigLayer: ULayer[KafkaStreamsConfig] =
+  private[this] lazy val localConfigLayer: ULayer[KafkaStreamsConfig] =
     KafkaStreamsConfig.make(localConfig.map(toAppConfig))
-  lazy val localCustomConfigLayer =
+  private[this] lazy val localCustomConfigLayer =
     ZLayer.succeed(new CustomConfig.Service {
       override def topics: Task[GitHubTopics] =
         localConfig.map(_.topics)
@@ -144,9 +144,9 @@ object GitHubConfig {
     ConfigSource
       .fromSystemEnv
       .flatMap(configSource => ZIO.fromEither(read(configDescriptor from configSource)))
-  lazy val envConfigLayer =
+  private[this] lazy val envConfigLayer =
     KafkaStreamsConfig.make(envConfig.provideLayer(zio.system.System.live).map(toAppConfig))
-  lazy val envCustomConfigLayer =
+  private[this] lazy val envCustomConfigLayer =
     ZLayer.succeed(new CustomConfig.Service {
       override def topics: Task[GitHubTopics] =
         envConfig.provideLayer(zio.system.System.live).map(_.topics)

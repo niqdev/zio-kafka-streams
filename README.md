@@ -89,6 +89,7 @@ object GitHubTopology {
   val layer: RLayer[ZEnv, KafkaStreamsTopology with KafkaStreamsConfig] =
     Logging.console() ++ GitHubConfig.localLayer >+> KafkaStreamsTopology.make(topology)
 }
+object GitHubApp extends KafkaStreamsApp(GitHubTopology.layer)
 ```
 
 How to run the example
@@ -109,6 +110,8 @@ make local-run
 * format data
 * publish data
 ```
+
+Complete example of [GitHubApp](https://github.com/niqdev/zio-kafka-streams/blob/master/examples/src/main/scala/com/github/niqdev/GitHubApp.scala)
 
 ## Development
 
