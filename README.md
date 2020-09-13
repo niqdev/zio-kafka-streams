@@ -45,7 +45,7 @@ object ToUpperCaseTopology {
 object ToUpperCaseApp extends KafkaStreamsApp(ToUpperCaseTopology.layer)
 ```
 
-How to run the application
+How to run the example
 ```bash
 # start kafka
 make local-up
@@ -65,6 +65,8 @@ kafka-console-producer --broker-list kafka:9092 --topic example.source.v1
 # consumer messages
 kafka-console-consumer --bootstrap-server kafka:9092 --topic example.sink.v1
 ```
+
+Complete example of [ToUpperCaseApp](https://github.com/niqdev/zio-kafka-streams/blob/master/examples/src/main/scala/com/github/niqdev/ToUpperCaseApp.scala)
 
 ## Development
 
