@@ -25,7 +25,7 @@ Probably the simplest Kafka Streams application you could think of
 ```scala
 object ToUpperCaseTopology {
   // build the topology
-  private val app: RIO[KafkaStreamsConfig with CustomConfig, Topology] =
+  private[this] lazy val topology: RIO[KafkaStreamsConfig with CustomConfig, Topology] =
     for {
       sourceTopic <- CustomConfig.sourceTopic
       sinkTopic   <- CustomConfig.sinkTopic
@@ -39,7 +39,8 @@ object ToUpperCaseTopology {
       }
     } yield topology
   // define the topology's layer
-  val layer: RLayer[ZEnv, KafkaStreamsTopology with KafkaStreamsConfig] = ???
+  val layer: RLayer[ZEnv, KafkaStreamsTopology with KafkaStreamsConfig] =
+    ToUpperCaseConfig.layer >+> KafkaStreamsTopology.make(topology)
 }
 // setup runtime
 object ToUpperCaseApp extends KafkaStreamsApp(ToUpperCaseTopology.layer)
@@ -62,7 +63,7 @@ docker exec -it local-kafka bash
 # publish messages
 kafka-console-producer --broker-list kafka:9092 --topic example.source.v1
 
-# consumer messages
+# consume messages
 kafka-console-consumer --bootstrap-server kafka:9092 --topic example.sink.v1
 ```
 
