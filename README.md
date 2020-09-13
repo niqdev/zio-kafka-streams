@@ -1,21 +1,12 @@
 # zio-kafka-streams
 
-Write Kafka Streams applications using ZIO and access the internal state store directly via GraphQL
+Write [Kafka Streams](https://docs.confluent.io/current/streams/developer-guide/index.html) applications using [ZIO](https://zio.dev) and access the internal state store directly via [GraphQL](https://ghostdogpr.github.io/caliban)
 
 > WIP
 
-TODO
-* [ ] kafkacat docker
-* [x] local kafka setup
-* [ ] examples
-* [ ] avro serde with confluent schema-registry
-* [ ] json serde with circe/zio-json
-* [ ] core wrappers
-* [ ] interop-cats
-* [ ] api with Caliban (pagination + subscriptions)
-* [ ] metrics with Prometheus
-* [ ] testkit
-* [ ] helm chart StatefulSet
+* [Examples](#examples)
+* [Development](#development)
+* [TODO](#todo)
 
 ## Examples
 
@@ -33,7 +24,7 @@ object ToUpperCaseTopology {
         for {
           // compose the topology using ZKStream and ZKTable
           sourceStream <- builder.stream[String, String](sourceTopic)
-          sinkStream   <- sourceStream.mapValues(_.toUpperCase)
+          sinkStream   <- sourceStream.mapValue(_.toUpperCase)
           _            <- sinkStream.to(sinkTopic)
         } yield ()
       }
@@ -84,8 +75,8 @@ object GitHubTopology {
         for {
           userStream         <- builder.streamAvro[UserKey, UserValue](topics.userSource)
           repositoryStream   <- builder.streamAvro[RepositoryKey, RepositoryValue](topics.repositorySource)
-          ghUserStream       <- userStream.mapKeys(GitHubEventKey.fromUser)
-          ghRepositoryStream <- repositoryStream.mapKeys(GitHubEventKey.fromRepository)
+          ghUserStream       <- userStream.mapKey(GitHubEventKey.fromUser)
+          ghRepositoryStream <- repositoryStream.mapKey(GitHubEventKey.fromRepository)
           ghUserTable        <- ghUserStream.toTableAvro
           ghRepositoryTable  <- ghRepositoryStream.toTableAvro
           gitHubTable        <- ghUserTable.joinAvro(ghRepositoryTable)(GitHubEventValue.joinUserRepository)
@@ -100,7 +91,24 @@ object GitHubTopology {
 }
 ```
 
-> TODO
+How to run the example
+```bash
+# start kafka
+make local-up
+
+# create source topics
+make topic-create name=example.user.v1
+make topic-create name=example.repository.v1
+
+# start application
+make local-run
+
+# TODO
+* generate schema
+* register schema
+* format data
+* publish data
+```
 
 ## Development
 
@@ -125,7 +133,18 @@ make topic-offset name=<TOPIC_NAME>
 [open|xdg-open] http://localhost:8001
 ```
 
-## Resources
+## TODO
 
-* [Kafka Developer Guide](https://docs.confluent.io/current/streams/developer-guide/index.html)
-* [Kafka Streams Interactive Queries](https://docs.confluent.io/current/streams/developer-guide/interactive-queries.html)
+* [ ] kafkacat docker
+* [ ] local kafka setup
+* [ ] examples
+* [ ] avro serde with confluent schema-registry
+* [ ] json serde with circe/zio-json
+* [ ] core wrappers
+* [ ] interop-cats
+* [ ] api with Caliban (pagination + subscriptions)
+    - [Kafka Streams Interactive Queries](https://docs.confluent.io/current/streams/developer-guide/interactive-queries.html)
+* [ ] metrics with Prometheus
+* [ ] testkit
+* [ ] helm chart StatefulSet
+* [ ] test + documentation
