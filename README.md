@@ -46,7 +46,7 @@ object ToUpperCaseApp extends KafkaStreamsApp(ToUpperCaseTopology.layer)
 ```
 
 How to run the application
-```
+```bash
 # start kafka
 make local-up
 

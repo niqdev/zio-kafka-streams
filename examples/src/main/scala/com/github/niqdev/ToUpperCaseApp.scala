@@ -123,15 +123,16 @@ object ToUpperCaseConfig {
       .fromSystemEnv
       .flatMap(configSource => ZIO.fromEither(read(configDescriptor from configSource)))
   lazy val envConfigLayer =
-    KafkaStreamsConfig.make(envConfig.map(toAppConfig))
+    KafkaStreamsConfig.make(envConfig.provideLayer(zio.system.System.live).map(toAppConfig))
   lazy val envCustomConfigLayer =
     ZLayer.succeed(new CustomConfig.Service {
       override def sourceTopic: Task[String] =
-        envConfig.map(_.sourceTopic)
+        envConfig.provideLayer(zio.system.System.live).map(_.sourceTopic)
       override def sinkTopic: Task[String] =
-        envConfig.map(_.sinkTopic)
+        envConfig.provideLayer(zio.system.System.live).map(_.sinkTopic)
       override def prettyPrint: Task[String] =
         envConfig
+          .provideLayer(zio.system.System.live)
           .flatMap(values => UIO(s"""
                |ENV custom configurations
                |LOG_LEVEL: ${values.logLevel}
