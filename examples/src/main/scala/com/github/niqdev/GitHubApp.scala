@@ -109,7 +109,7 @@ object GitHubConfig {
   private[this] lazy val localConfig: IO[ReadError[String], GitHubConfig] = {
     val configMap =
       Map(
-        "APPLICATION_ID"      -> "github-v0.1.0",
+        "APPLICATION_ID"      -> "github-local-v0.1.0",
         "BOOTSTRAP_SERVERS"   -> "localhost:9092",
         "SCHEMA_REGISTRY_URL" -> "http://localhost:8081",
         "LOG_LEVEL"           -> "???",
