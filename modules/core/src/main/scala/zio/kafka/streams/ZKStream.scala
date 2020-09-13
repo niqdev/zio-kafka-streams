@@ -3,13 +3,21 @@ package streams
 
 import kafka.streams.serde._
 import org.apache.kafka.streams.kstream.Printed
+import org.apache.kafka.streams.scala._
 import org.apache.kafka.streams.scala.kstream._
 import zio._
 
+// TODO incomplete
 sealed abstract class ZKStream[K, V](private val stream: KStream[K, V]) {
+
+  def mapKeys[KO](f: K => KO): Task[ZKStream[KO, V]] =
+    ZKStream(stream.map((key, value) => f(key) -> value))
 
   def mapValues[VO](f: V => VO): Task[ZKStream[K, VO]] =
     ZKStream(stream.mapValues(f))
+
+  def map[KO, VO](f: (K, V) => (KO, VO)): Task[ZKStream[KO, VO]] =
+    ZKStream(stream.map(f))
 
   def toProduced(topic: String): Produced[K, V] => RIO[KafkaStreamsConfig, Unit] =
     produced =>
@@ -32,6 +40,18 @@ sealed abstract class ZKStream[K, V](private val stream: KStream[K, V]) {
     KafkaStreamsConfig
       .requiredSchemaRegistryUrl
       .flatMap(schemaRegistryUrl => toProduced(topic)(P.produced(schemaRegistryUrl)))
+
+  def toTable(
+    implicit M: RecordMaterialized[K, V, ByteArrayKeyValueStore]
+  ): RIO[KafkaStreamsConfig, ZKTable[K, V]] =
+    ZKTable(stream.toTable(M.materialize))
+
+  def toTableAvro(
+    implicit M: AvroRecordMaterialized[K, V, ByteArrayKeyValueStore]
+  ): RIO[KafkaStreamsConfig, ZKTable[K, V]] =
+    KafkaStreamsConfig
+      .requiredSchemaRegistryUrl
+      .flatMap(schemaRegistryUrl => ZKTable(stream.toTable(M.materialize(schemaRegistryUrl))))
 }
 
 object ZKStream {

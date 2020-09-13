@@ -69,6 +69,39 @@ kafka-console-consumer --bootstrap-server kafka:9092 --topic example.sink.v1
 
 Complete example of [ToUpperCaseApp](https://github.com/niqdev/zio-kafka-streams/blob/master/examples/src/main/scala/com/github/niqdev/ToUpperCaseApp.scala)
 
+### GitHubApp
+
+Joining avro streams has never been so easy ;-)
+```scala
+object GitHubTopology {
+  private[this] lazy val topology: RIO[KafkaStreamsConfig with CustomConfig with Logging, Topology] =
+    for {
+      config <- KafkaStreamsConfig.config
+      _      <- log.info(s"Running ${config.applicationId}")
+      _      <- CustomConfig.prettyPrint.flatMap(values => log.info(values))
+      topics <- CustomConfig.topics
+      topology <- ZStreamsBuilder { builder =>
+        for {
+          userStream         <- builder.streamAvro[UserKey, UserValue](topics.userSource)
+          repositoryStream   <- builder.streamAvro[RepositoryKey, RepositoryValue](topics.repositorySource)
+          ghUserStream       <- userStream.mapKeys(GitHubEventKey.fromUser)
+          ghRepositoryStream <- repositoryStream.mapKeys(GitHubEventKey.fromRepository)
+          ghUserTable        <- ghUserStream.toTableAvro
+          ghRepositoryTable  <- ghRepositoryStream.toTableAvro
+          gitHubTable        <- ghUserTable.joinAvro(ghRepositoryTable)(GitHubEventValue.joinUserRepository)
+          gitHubStream       <- gitHubTable.toStream
+          _                  <- gitHubStream.toAvro(topics.gitHubSink)
+        } yield ()
+      }
+    } yield topology
+
+  val layer: RLayer[ZEnv, KafkaStreamsTopology with KafkaStreamsConfig] =
+    Logging.console() ++ GitHubConfig.localLayer >+> KafkaStreamsTopology.make(topology)
+}
+```
+
+> TODO
+
 ## Development
 
 ```bash

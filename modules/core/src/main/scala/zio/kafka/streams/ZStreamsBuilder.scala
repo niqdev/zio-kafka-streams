@@ -8,6 +8,7 @@ import org.apache.kafka.streams.scala.StreamsBuilder
 import org.apache.kafka.streams.scala.kstream._
 import zio._
 
+// TODO incomplete
 sealed abstract class ZStreamsBuilder(private val builder: StreamsBuilder) {
 
   def streamConsumed[K, V](topic: String): Consumed[K, V] => RIO[KafkaStreamsConfig, ZKStream[K, V]] =
