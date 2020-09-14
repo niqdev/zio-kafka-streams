@@ -50,3 +50,22 @@ topic-offset: require-docker check-param-name
 schema-generate: require-sbt
 	rm -f ./local/schema/{*.avsc,*.json}
 	sbt "examples/runMain com.github.niqdev.GenerateSchema"
+
+.PHONY: schema-register
+schema-register: require-docker require-jq check-param-name
+	./local/scripts/kafka_apply.sh "schema-register" ${name}
+
+##############################
+
+.PHONY: topic-create-all
+topic-create-all:
+	@make topic-create name=example.user.v1
+	@make topic-create name=example.repository.v1
+	@make topic-list
+
+.PHONY: schema-register-all
+schema-register-all: schema-generate
+	@make schema-register name=example.user.v1-key
+	@make schema-register name=example.user.v1-value
+	@make schema-register name=example.repository.v1-key
+	@make schema-register name=example.repository.v1-value

@@ -8,6 +8,7 @@ cd ${CURRENT_PATH}
 PARAM_ACTION=${1:?"Missing ACTION"}
 
 BOOTSTRAP_SERVERS="kafka:9092"
+SCHEMA_REGISTRY_URL="http://schema-registry:8081"
 
 ##############################
 
@@ -101,11 +102,12 @@ case ${PARAM_ACTION} in
       --to-earliest \
       --execute"
   ;;
-  # TODO not used
   "schema-register")
     PARAM_SCHEMA_NAME=${2:?"Missing SCHEMA_NAME"}
     echo "[*] SCHEMA_NAME=${PARAM_SCHEMA_NAME}"
+    # local machine path
     LOCAL_SCHEMA_PATH="../schema"
+    # path of the volume mounted in docker container
     CONTAINER_SCHEMA_PATH="/schema"
 
     # prepare json request: wrap into schema object
@@ -116,7 +118,7 @@ case ${PARAM_ACTION} in
     docker exec -i local-schema-registry \
       curl -s -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" \
       --data @"${CONTAINER_SCHEMA_PATH}/${PARAM_SCHEMA_NAME}.json" \
-      "http://schema-registry:8081/subjects/${PARAM_SCHEMA_NAME}/versions"
+      "${SCHEMA_REGISTRY_URL}/subjects/${PARAM_SCHEMA_NAME}/versions"
   ;;
   *)
     echo "ERROR: unknown command"

@@ -98,17 +98,15 @@ How to run the example
 make local-up
 
 # create source topics
-make topic-create name=example.user.v1
-make topic-create name=example.repository.v1
+make topic-create-all
+
+# generate avsc and register schema
+make schema-register-all
 
 # start application
 make local-run
 
-# generate avsc
-make schema-generate
-
 # TODO
-* register schema
 * format data
 * publish data
 ```
