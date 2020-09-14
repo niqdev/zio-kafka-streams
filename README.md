@@ -1,5 +1,10 @@
 # zio-kafka-streams
 
+[![Build Status][build-image]][build-url]
+
+[build-image]: https://travis-ci.org/niqdev/zio-kafka-streams.svg?branch=master
+[build-url]: https://travis-ci.org/niqdev/zio-kafka-streams
+
 Write [Kafka Streams](https://docs.confluent.io/current/streams/developer-guide/index.html) applications using [ZIO](https://zio.dev) and access the internal state store directly via [GraphQL](https://ghostdogpr.github.io/caliban)
 
 > WIP
@@ -115,7 +120,7 @@ make format-data-all
 # access schema-registry
 docker exec -it local-schema-registry bash
 
-# export producer config
+# export producer config (see below)
 SCHEMA_KEY_ID=XXX
 SCHEMA_VALUE_ID=YYY
 TOPIC_NAME=ZZZ
@@ -136,7 +141,7 @@ How to consume messages locally
 # access schema-registry
 docker exec -it local-schema-registry bash
 
-# export consumer config
+# export consumer config (see below)
 TOPIC_NAME=XYZ
 
 # start avro consumer
