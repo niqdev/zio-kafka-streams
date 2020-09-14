@@ -202,6 +202,7 @@ make topic-offset name=<TOPIC_NAME>
 
 ## TODO
 
+* [ ] (zio) [newtype](https://github.com/zio/zio-prelude/blob/d34b5c0e74557edd8709f7c45b40297bf4280d77/src/main/scala/zio/prelude/NewtypeModule.scala) + refined ?
 * [ ] kafkacat docker
 * [ ] local kafka setup
 * [ ] examples

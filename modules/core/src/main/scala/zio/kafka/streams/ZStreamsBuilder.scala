@@ -8,7 +8,8 @@ import org.apache.kafka.streams.scala.StreamsBuilder
 import org.apache.kafka.streams.scala.kstream._
 import zio._
 
-// TODO incomplete
+// TODO incomplete: table, tableAvro, globalTable, addStateStore, addGlobalStore, build(props)
+// TODO newtype/refined ?
 sealed abstract class ZStreamsBuilder(private val builder: StreamsBuilder) {
 
   def streamConsumed[K, V](topic: String): Consumed[K, V] => RIO[KafkaStreamsConfig, ZKStream[K, V]] =
@@ -22,11 +23,25 @@ sealed abstract class ZStreamsBuilder(private val builder: StreamsBuilder) {
         }
       } yield stream
 
+  /**
+    * Create a [[ZKStream]] from the specified topic.
+    *
+    * @param topic the topic name
+    * @param C an implicit instance of [[RecordConsumed]] is required
+    * @return a [[ZKStream]] for the specified topic
+    */
   def stream[K, V](topic: String)(
     implicit C: RecordConsumed[K, V]
   ): RIO[KafkaStreamsConfig, ZKStream[K, V]] =
     streamConsumed(topic)(C.consumed)
 
+  /**
+    * Create a [[ZKStream]] from the specified topic.
+    *
+    * @param topic the topic name
+    * @param C an implicit instance of [[AvroRecordConsumed]] is required
+    * @return a [[ZKStream]] for the specified topic
+    */
   def streamAvro[K, V](topic: String)(
     implicit C: AvroRecordConsumed[K, V]
   ): RIO[KafkaStreamsConfig, ZKStream[K, V]] =
