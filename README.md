@@ -87,7 +87,7 @@ object GitHubTopology {
     } yield topology
 
   val layer: RLayer[ZEnv, KafkaStreamsTopology with KafkaStreamsConfig] =
-    Logging.console() ++ GitHubConfig.localLayer >+> KafkaStreamsTopology.make(topology)
+    Logging.console() ++ GitHubConfig.envLayer >+> KafkaStreamsTopology.make(topology)
 }
 object GitHubApp extends KafkaStreamsApp(GitHubTopology.layer)
 ```
@@ -104,8 +104,10 @@ make topic-create name=example.repository.v1
 # start application
 make local-run
 
+# generate avsc
+make schema-generate
+
 # TODO
-* generate schema
 * register schema
 * format data
 * publish data
@@ -149,5 +151,7 @@ make topic-offset name=<TOPIC_NAME>
     - [Kafka Streams Interactive Queries](https://docs.confluent.io/current/streams/developer-guide/interactive-queries.html)
 * [ ] metrics with Prometheus
 * [ ] testkit
+* [ ] generator with magnolia for testing
 * [ ] helm chart StatefulSet
 * [ ] test + documentation
+* [ ] GenerateSchema sbt plugin

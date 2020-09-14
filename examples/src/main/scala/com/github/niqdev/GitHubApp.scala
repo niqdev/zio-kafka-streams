@@ -63,6 +63,7 @@ final case class GitHubTopics(
 )
 object GitHubConfig {
   type CustomConfig = Has[CustomConfig.Service]
+
   object CustomConfig {
     trait Service {
       def topics: Task[GitHubTopics]

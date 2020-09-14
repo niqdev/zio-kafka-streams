@@ -45,3 +45,8 @@ topic-delete: require-docker check-param-name
 .PHONY: topic-offset
 topic-offset: require-docker check-param-name
 	./local/scripts/kafka_apply.sh "topic-offset" ${name}
+
+.PHONY: schema-generate
+schema-generate: require-sbt
+	rm -f ./local/schema/{*.avsc,*.json}
+	sbt "examples/runMain com.github.niqdev.GenerateSchema"

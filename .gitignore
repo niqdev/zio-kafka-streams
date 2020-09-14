@@ -5,3 +5,6 @@
 *.iml
 
 target/
+
+local/schema/*.avsc
+local/schema/*.json
