@@ -159,12 +159,12 @@ kafka-avro-console-consumer \
 
 Configurations
 ```bash
-# produce to "user" source
+# produce to "user" topic
 SCHEMA_KEY_ID=1
 SCHEMA_VALUE_ID=2
 TOPIC_NAME=example.user.v1
 
-# produce to "repository" source
+# produce to "repository" topic
 SCHEMA_KEY_ID=3
 SCHEMA_VALUE_ID=4
 TOPIC_NAME=example.repository.v1

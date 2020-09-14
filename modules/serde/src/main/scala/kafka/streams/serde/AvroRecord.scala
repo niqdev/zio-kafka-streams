@@ -11,7 +11,9 @@ trait AvroRecordConsumed[K, V] {
 }
 
 object AvroRecordConsumed {
-  def apply[K, V](implicit ev: AvroRecordConsumed[K, V]): AvroRecordConsumed[K, V] = ev
+  def apply[K, V](
+    implicit ev: AvroRecordConsumed[K, V]
+  ): AvroRecordConsumed[K, V] = ev
 
   implicit def avroRecordConsumed[K, V](
     implicit K: AvroCodec[K],
@@ -23,7 +25,16 @@ object AvroRecordConsumed {
         V.serde(schemaRegistry)
       )
 
-  // TODO
+  implicit def avroRecordKeyConsumed[K, V](
+    implicit K: AvroCodec[K],
+    V: Codec[V]
+  ): AvroRecordConsumed[K, V] =
+    schemaRegistry =>
+      Consumed.`with`[K, V](
+        K.serde(schemaRegistry),
+        V.serde
+      )
+
   implicit def avroRecordValueConsumed[K, V](
     implicit K: Codec[K],
     V: AvroCodec[V]
@@ -43,7 +54,9 @@ trait AvroRecordGrouped[K, V] {
 }
 
 object AvroRecordGrouped {
-  def apply[K, V](implicit ev: AvroRecordGrouped[K, V]): AvroRecordGrouped[K, V] = ev
+  def apply[K, V](
+    implicit ev: AvroRecordGrouped[K, V]
+  ): AvroRecordGrouped[K, V] = ev
 
   implicit def avroRecordGrouped[K, V](
     implicit K: AvroCodec[K],
@@ -52,6 +65,26 @@ object AvroRecordGrouped {
     schemaRegistry =>
       Grouped.`with`[K, V](
         K.serde(schemaRegistry),
+        V.serde(schemaRegistry)
+      )
+
+  implicit def avroRecordKeyGrouped[K, V](
+    implicit K: AvroCodec[K],
+    V: Codec[V]
+  ): AvroRecordGrouped[K, V] =
+    schemaRegistry =>
+      Grouped.`with`[K, V](
+        K.serde(schemaRegistry),
+        V.serde
+      )
+
+  implicit def avroRecordValueGrouped[K, V](
+    implicit K: Codec[K],
+    V: AvroCodec[V]
+  ): AvroRecordGrouped[K, V] =
+    schemaRegistry =>
+      Grouped.`with`[K, V](
+        K.serde,
         V.serde(schemaRegistry)
       )
 }
@@ -64,7 +97,9 @@ trait AvroRecordJoined[K, V, VO] {
 }
 
 object AvroRecordJoined {
-  def apply[K, V, VO](implicit ev: AvroRecordJoined[K, V, VO]): AvroRecordJoined[K, V, VO] = ev
+  def apply[K, V, VO](
+    implicit ev: AvroRecordJoined[K, V, VO]
+  ): AvroRecordJoined[K, V, VO] = ev
 
   implicit def avroRecordJoined[K, V, VO](
     implicit K: AvroCodec[K],
@@ -74,6 +109,30 @@ object AvroRecordJoined {
     schemaRegistry =>
       Joined.`with`[K, V, VO](
         K.serde(schemaRegistry),
+        V.serde(schemaRegistry),
+        VO.serde(schemaRegistry)
+      )
+
+  implicit def avroRecordKeyJoined[K, V, VO](
+    implicit K: AvroCodec[K],
+    V: Codec[V],
+    VO: Codec[VO]
+  ): AvroRecordJoined[K, V, VO] =
+    schemaRegistry =>
+      Joined.`with`[K, V, VO](
+        K.serde(schemaRegistry),
+        V.serde,
+        VO.serde
+      )
+
+  implicit def avroRecordValueJoined[K, V, VO](
+    implicit K: Codec[K],
+    V: AvroCodec[V],
+    VO: AvroCodec[VO]
+  ): AvroRecordJoined[K, V, VO] =
+    schemaRegistry =>
+      Joined.`with`[K, V, VO](
+        K.serde,
         V.serde(schemaRegistry),
         VO.serde(schemaRegistry)
       )
@@ -100,6 +159,26 @@ object AvroRecordMaterialized {
         K.serde(schemaRegistry),
         V.serde(schemaRegistry)
       )
+
+  implicit def avroRecordKeyMaterialized[K, V, S <: StateStore](
+    implicit K: AvroCodec[K],
+    V: Codec[V]
+  ): AvroRecordMaterialized[K, V, S] =
+    schemaRegistry =>
+      Materialized.`with`[K, V, S](
+        K.serde(schemaRegistry),
+        V.serde
+      )
+
+  implicit def avroRecordValueMaterialized[K, V, S <: StateStore](
+    implicit K: Codec[K],
+    V: AvroCodec[V]
+  ): AvroRecordMaterialized[K, V, S] =
+    schemaRegistry =>
+      Materialized.`with`[K, V, S](
+        K.serde,
+        V.serde(schemaRegistry)
+      )
 }
 
 /**
@@ -110,7 +189,9 @@ trait AvroRecordProduced[K, V] {
 }
 
 object AvroRecordProduced {
-  def apply[K, V](implicit ev: AvroRecordProduced[K, V]): AvroRecordProduced[K, V] = ev
+  def apply[K, V](
+    implicit ev: AvroRecordProduced[K, V]
+  ): AvroRecordProduced[K, V] = ev
 
   implicit def avroRecordProduced[K, V](
     implicit K: AvroCodec[K],
@@ -119,6 +200,26 @@ object AvroRecordProduced {
     schemaRegistry =>
       Produced.`with`[K, V](
         K.serde(schemaRegistry),
+        V.serde(schemaRegistry)
+      )
+
+  implicit def avroRecordKeyProduced[K, V](
+    implicit K: AvroCodec[K],
+    V: Codec[V]
+  ): AvroRecordProduced[K, V] =
+    schemaRegistry =>
+      Produced.`with`[K, V](
+        K.serde(schemaRegistry),
+        V.serde
+      )
+
+  implicit def avroRecordValueProduced[K, V](
+    implicit K: Codec[K],
+    V: AvroCodec[V]
+  ): AvroRecordProduced[K, V] =
+    schemaRegistry =>
+      Produced.`with`[K, V](
+        K.serde,
         V.serde(schemaRegistry)
       )
 }
@@ -131,7 +232,9 @@ trait AvroRecordStreamJoined[K, V, VO] {
 }
 
 object AvroRecordStreamJoined {
-  def apply[K, V, VO](implicit ev: AvroRecordStreamJoined[K, V, VO]): AvroRecordStreamJoined[K, V, VO] = ev
+  def apply[K, V, VO](
+    implicit ev: AvroRecordStreamJoined[K, V, VO]
+  ): AvroRecordStreamJoined[K, V, VO] = ev
 
   implicit def avroRecordStreamJoined[K, V, VO](
     implicit K: AvroCodec[K],
@@ -141,6 +244,30 @@ object AvroRecordStreamJoined {
     schemaRegistry =>
       StreamJoined.`with`[K, V, VO](
         K.serde(schemaRegistry),
+        V.serde(schemaRegistry),
+        VO.serde(schemaRegistry)
+      )
+
+  implicit def avroRecordKeyStreamJoined[K, V, VO](
+    implicit K: AvroCodec[K],
+    V: Codec[V],
+    VO: Codec[VO]
+  ): AvroRecordStreamJoined[K, V, VO] =
+    schemaRegistry =>
+      StreamJoined.`with`[K, V, VO](
+        K.serde(schemaRegistry),
+        V.serde,
+        VO.serde
+      )
+
+  implicit def avroRecordValueStreamJoined[K, V, VO](
+    implicit K: Codec[K],
+    V: AvroCodec[V],
+    VO: AvroCodec[VO]
+  ): AvroRecordStreamJoined[K, V, VO] =
+    schemaRegistry =>
+      StreamJoined.`with`[K, V, VO](
+        K.serde,
         V.serde(schemaRegistry),
         VO.serde(schemaRegistry)
       )

@@ -14,4 +14,4 @@ cache:
     - $HOME/.sbt
 
 script:
-  - sbt ++$TRAVIS_SCALA_VERSION clean test
+  - sbt ++$TRAVIS_SCALA_VERSION build
