@@ -55,6 +55,10 @@ schema-generate: require-sbt
 schema-register: require-docker require-jq check-param-name
 	./local/scripts/kafka_apply.sh "schema-register" ${name}
 
+.PHONY: format-data
+format-data: require-jq check-param-name
+	./local/scripts/format_data.sh ${name}
+
 ##############################
 
 .PHONY: topic-create-all
@@ -69,3 +73,8 @@ schema-register-all: schema-generate
 	@make schema-register name=example.user.v1-value
 	@make schema-register name=example.repository.v1-key
 	@make schema-register name=example.repository.v1-value
+
+.PHONY: format-data-all
+format-data-all: require-jq
+	@make format-data name=user
+	@make format-data name=repository

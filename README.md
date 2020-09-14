@@ -105,10 +105,69 @@ make schema-register-all
 
 # start application
 make local-run
+```
 
-# TODO
-* format data
-* publish data
+How to publish messages locally
+```bash
+# format example data
+make format-data-all
+
+# access schema-registry
+docker exec -it local-schema-registry bash
+
+# export producer config
+SCHEMA_KEY_ID=XXX
+SCHEMA_VALUE_ID=YYY
+TOPIC_NAME=ZZZ
+
+# start avro producer
+kafka-avro-console-producer \
+  --bootstrap-server kafka:29092 \
+  --property schema.registry.url="http://schema-registry:8081" \
+  --property parse.key=true \
+  --property key.schema="$(curl -s http://schema-registry:8081/schemas/ids/$SCHEMA_KEY_ID | jq -r .schema)" \
+  --property value.schema="$(curl -s http://schema-registry:8081/schemas/ids/$SCHEMA_VALUE_ID | jq -r .schema)" \
+  --property key.separator=::: \
+  --topic $TOPIC_NAME
+```
+
+How to consume messages locally
+```bash
+# access schema-registry
+docker exec -it local-schema-registry bash
+
+# export consumer config
+TOPIC_NAME=XYZ
+
+# start avro consumer
+kafka-avro-console-consumer \
+  --bootstrap-server kafka:29092 \
+  --property schema.registry.url="http://schema-registry:8081" \
+  --property schema.id.separator=: \
+  --property print.key=true \
+  --property print.schema.ids=true \
+  --property key.separator=, \
+  --topic $TOPIC_NAME \
+  --from-beginning \
+  --max-messages 10
+```
+
+Configurations
+```bash
+# produce to "user" source
+SCHEMA_KEY_ID=1
+SCHEMA_VALUE_ID=2
+TOPIC_NAME=example.user.v1
+
+# produce to "repository" source
+SCHEMA_KEY_ID=3
+SCHEMA_VALUE_ID=4
+TOPIC_NAME=example.repository.v1
+
+# consume from topics
+TOPIC_NAME=example.user.v1
+TOPIC_NAME=example.repository.v1
+TOPIC_NAME=example.github.v1
 ```
 
 Complete example of [GitHubApp](https://github.com/niqdev/zio-kafka-streams/blob/master/examples/src/main/scala/com/github/niqdev/GitHubApp.scala)

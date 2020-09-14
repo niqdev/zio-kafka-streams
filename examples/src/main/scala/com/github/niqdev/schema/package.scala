@@ -1,5 +1,6 @@
 package com.github.niqdev
 
+import java.time.Instant
 import java.util.UUID
 
 import com.sksamuel.avro4s._
@@ -32,4 +33,13 @@ package object schema {
     }
   final implicit def nesMapSchemaFor[A: SchemaFor]: SchemaFor[Map[NonEmptyString, A]] =
     SchemaFor.mapSchemaFor[A].map[Map[NonEmptyString, A]](identity)
+
+  final implicit val instantEncoder: Encoder[Instant] =
+    Encoder.StringEncoder.comap[Instant](_.toString)
+  final implicit val instantDecoder: Decoder[Instant] =
+    Decoder.StringDecoder.map[Instant] { unsafeValue =>
+      Instant.from(java.time.format.DateTimeFormatter.ISO_INSTANT.parse(unsafeValue))
+    }
+  final implicit val instantSchemaFor: SchemaFor[Instant] =
+    SchemaFor[Instant](SchemaFor.StringSchemaFor.schema)
 }
