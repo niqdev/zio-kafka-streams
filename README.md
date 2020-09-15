@@ -10,10 +10,13 @@ Write [Kafka Streams](https://docs.confluent.io/current/streams/developer-guide/
 > WIP
 
 * [Examples](#examples)
+* [Kafka Streams serdes](#kafka-streams-serde)
 * [Development](#development)
 * [TODO](#todo)
 
 ## Examples
+
+Examples of how to write Kafka Streams applications using `ZStreamsBuilder`, `ZKStream` and `ZKTable`
 
 ### ToUpperCase
 
@@ -176,6 +179,48 @@ TOPIC_NAME=example.github.v1
 ```
 
 Complete example of [GitHubApp](https://github.com/niqdev/zio-kafka-streams/blob/master/examples/src/main/scala/com/github/niqdev/GitHubApp.scala)
+
+## kafka-streams-serde
+
+`kafka-streams-serde` is an independent module without ZIO dependencies useful to build [Serdes](https://docs.confluent.io/current/streams/developer-guide/datatypes.html) with your favourite effect system
+
+How to autoderive an avro serde for keys and values integrated with Confluent [Schema Registry](https://docs.confluent.io/current/schema-registry/index.html) leveraging [avro4s](https://github.com/sksamuel/avro4s)
+```scala
+import com.sksamuel.avro4s._
+import kafka.streams.serde._
+
+final case class DummyValue(value: String)
+object DummyValue {
+  final implicit val dummyValueEncoder: Encoder[DummyValue] =
+    Encoder.gen[DummyValue]
+  final implicit val dummyValueDecoder: Decoder[DummyValue] =
+    Decoder.gen[DummyValue]
+  final implicit val dummyValueSchemaFor: SchemaFor[DummyValue] =
+    SchemaFor.gen[DummyValue]
+  final implicit val dummyValueAvroCodec: AvroCodec[DummyValue] =
+    AvroCodec.genericValue[DummyValue]
+}
+```
+
+For more complex examples with [refined](https://github.com/fthomas/refined), [newtype](https://github.com/estatico/scala-newtype), [enumeratum](https://github.com/lloydmeta/enumeratum) and custom types see the [schema](https://github.com/niqdev/zio-kafka-streams/tree/master/examples/src/main/scala/com/github/niqdev/schema) package
+
+Example of how to build a syntax with [Cats Effect](https://typelevel.org/cats-effect) using `Record` and `AvroRecord`
+```scala
+object syntax {
+  final implicit def streamsBuilderSyntax[F[_]](builder: StreamsBuilder): StreamsBuilderOps[F] =
+    new StreamsBuilderOps(builder)
+}
+
+final class StreamsBuilderOps[F[_]](private val builder: StreamsBuilder) extends AnyVal {
+  def streamF[K, V](
+    topic: String,
+    schemaRegistry: String
+  )(implicit F: Sync[F], C: AvroRecordConsumed[K, V]): F[KStream[K, V]] =
+    F.delay(builder.stream(topic)(C.consumed(schemaRegistry)))
+}
+```
+
+Complete example of [KafkaStreamsCatsSyntax](https://github.com/niqdev/zio-kafka-streams/tree/master/examples/src/main/scala/com/github/niqdev/KafkaStreamsCatsSyntax)
 
 ## Development
 
