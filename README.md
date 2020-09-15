@@ -220,7 +220,7 @@ final class StreamsBuilderOps[F[_]](private val builder: StreamsBuilder) extends
 }
 ```
 
-Complete example of [KafkaStreamsCatsSyntax](https://github.com/niqdev/zio-kafka-streams/tree/master/examples/src/main/scala/com/github/niqdev/KafkaStreamsCatsSyntax)
+Complete example of [KafkaStreamsCatsSyntax](https://github.com/niqdev/zio-kafka-streams/blob/master/examples/src/main/scala/com/github/niqdev/KafkaStreamsCatsSyntax.scala)
 
 ## Development
 
