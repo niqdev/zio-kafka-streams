@@ -263,3 +263,4 @@ make topic-offset name=<TOPIC_NAME>
 * [ ] helm chart StatefulSet
 * [ ] test + documentation
 * [ ] GenerateSchema sbt plugin
+* [ ] replace `kafka-streams-scala` with plain Java?

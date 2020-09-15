@@ -4,11 +4,11 @@ package streams
 import kafka.streams.serde._
 import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.kstream.Printed
-import org.apache.kafka.streams.scala.StreamsBuilder
 import org.apache.kafka.streams.scala.kstream._
+import org.apache.kafka.streams.scala.{ ByteArrayKeyValueStore, StreamsBuilder }
 import zio._
 
-// TODO incomplete: table, tableAvro, globalTable, addStateStore, addGlobalStore, build(props)
+// TODO incomplete: globalTable, addStateStore, addGlobalStore, build(props)
 // TODO newtype/refined ?
 sealed abstract class ZStreamsBuilder(private val builder: StreamsBuilder) {
 
@@ -24,11 +24,8 @@ sealed abstract class ZStreamsBuilder(private val builder: StreamsBuilder) {
       } yield stream
 
   /**
-    * Create a [[ZKStream]] from the specified topic.
-    *
-    * @param topic the topic name
-    * @param C an implicit instance of [[RecordConsumed]] is required
-    * @return a [[ZKStream]] for the specified topic
+    * Creates a [[ZKStream]] from the specified topic name,
+    * requires an implicit instance of [[RecordConsumed]].
     */
   def stream[K, V](topic: String)(
     implicit C: RecordConsumed[K, V]
@@ -36,11 +33,8 @@ sealed abstract class ZStreamsBuilder(private val builder: StreamsBuilder) {
     streamConsumed(topic)(C.consumed)
 
   /**
-    * Create a [[ZKStream]] from the specified topic.
-    *
-    * @param topic the topic name
-    * @param C an implicit instance of [[AvroRecordConsumed]] is required
-    * @return a [[ZKStream]] for the specified topic
+    * Creates a [[ZKStream]] from the specified topic name,
+    * requires an implicit instance of [[AvroRecordConsumed]].
     */
   def streamAvro[K, V](topic: String)(
     implicit C: AvroRecordConsumed[K, V]
@@ -48,6 +42,30 @@ sealed abstract class ZStreamsBuilder(private val builder: StreamsBuilder) {
     KafkaStreamsConfig
       .requiredSchemaRegistryUrl
       .flatMap(schemaRegistryUrl => streamConsumed(topic)(C.consumed(schemaRegistryUrl)))
+
+  /**
+    * Creates a [[ZKTable]] from the specified topic name,
+    * requires an implicit instance of [[RecordConsumed]] and [[RecordMaterialized]].
+    */
+  def table[K, V](topic: String)(
+    implicit C: RecordConsumed[K, V],
+    M: RecordMaterialized[K, V, ByteArrayKeyValueStore]
+  ): RIO[KafkaStreamsConfig, ZKTable[K, V]] =
+    ZKTable(builder.table(topic, M.materialize)(C.consumed))
+
+  /**
+    * Creates a [[ZKTable]] from the specified topic name,
+    * requires an implicit instance of [[AvroRecordConsumed]] and [[AvroRecordMaterialized]].
+    */
+  def tableAvro[K, V](topic: String)(
+    implicit C: AvroRecordConsumed[K, V],
+    M: AvroRecordMaterialized[K, V, ByteArrayKeyValueStore]
+  ): RIO[KafkaStreamsConfig, ZKTable[K, V]] =
+    KafkaStreamsConfig
+      .requiredSchemaRegistryUrl
+      .flatMap(schemaRegistryUrl =>
+        ZKTable(builder.table(topic, M.materialize(schemaRegistryUrl))(C.consumed(schemaRegistryUrl)))
+      )
 }
 
 object ZStreamsBuilder {
@@ -55,6 +73,9 @@ object ZStreamsBuilder {
   def newInstance: Task[ZStreamsBuilder] =
     Task.effect(new ZStreamsBuilder(new StreamsBuilder()) {})
 
+  /**
+    * Uses monadic composition to builds a [[Topology]] with [[ZKStream]] and [[ZKTable]].
+    */
   def apply(f: ZStreamsBuilder => RIO[KafkaStreamsConfig, Unit]): RIO[KafkaStreamsConfig, Topology] =
     newInstance.flatMap(zsb => f(zsb) *> Task.effect(zsb.builder.build()))
 }
