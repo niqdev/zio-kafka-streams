@@ -5,6 +5,7 @@ lazy val V = new {
   val zio       = "1.0.1"
 
   // examples
+  val catsEffect = "2.2.0"
   val enumeratum = "1.6.1"
   val logback    = "1.2.3"
   val newtype    = "0.4.4"
@@ -65,6 +66,7 @@ lazy val examples = project
       "-Ymacro-annotations"
     ),
     libraryDependencies ++= Seq(
+      "org.typelevel"       %% "cats-effect"        % V.catsEffect,
       "dev.zio"             %% "zio-logging"        % V.zioLogging,
       "dev.zio"             %% "zio-config"         % V.zioConfig,
       "dev.zio"             %% "zio-config-refined" % V.zioConfig,
