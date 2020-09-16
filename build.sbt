@@ -45,19 +45,39 @@ lazy val serde = project
     )
   )
 
-// TODO zio-kafka-streams-testkit module
 lazy val core = project
   .in(file("modules/core"))
   .dependsOn(serde)
   .settings(commonSettings)
   .settings(
     name := "zio-kafka-streams",
+    libraryDependencies ++= Seq(
+      "dev.zio" %% "zio" % V.zio
+    )
+  )
+
+lazy val testkit = project
+  .in(file("modules/testkit"))
+  .dependsOn(core)
+  .settings(commonSettings)
+  .settings(
+    name := "zio-kafka-streams-testkit",
+    libraryDependencies ++= Seq(
+      "org.apache.kafka" % "kafka-streams-test-utils" % V.kafka,
+      "dev.zio"         %% "zio-test"                 % V.zio
+    )
+  )
+
+lazy val tests = project
+  .in(file("modules/tests"))
+  .dependsOn(testkit)
+  .settings(commonSettings)
+  .settings(
+    name := "tests",
     testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")),
     libraryDependencies ++= Seq(
-      "dev.zio"         %% "zio"                      % V.zio,
-      "org.apache.kafka" % "kafka-streams-test-utils" % V.kafka % Test,
-      "dev.zio"         %% "zio-test"                 % V.zio   % Test,
-      "dev.zio"         %% "zio-test-sbt"             % V.zio   % Test
+      "dev.zio"       %% "zio-test-sbt"    % V.zio     % Test,
+      "ch.qos.logback" % "logback-classic" % V.logback % Runtime
     )
   )
 
@@ -85,7 +105,7 @@ lazy val examples = project
 
 lazy val root = project
   .in(file("."))
-  .aggregate(core, serde, examples)
+  .aggregate(serde, core, testkit, tests, examples)
   .settings(
     name := "zio-kafka-streams-root",
     addCommandAlias("checkFormat", ";scalafmtCheckAll;scalafmtSbtCheck"),

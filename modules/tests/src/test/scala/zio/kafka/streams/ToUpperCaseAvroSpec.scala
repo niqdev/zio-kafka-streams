@@ -60,7 +60,7 @@ object ToUpperCaseAvroSpec extends DefaultRunnableSpec {
     ZManaged.make(setup)(driver => Task.effect(driver.close()).catchAll(_ => ZIO.unit))
 
   override def spec: ZSpec[TestEnvironment, Any] =
-    suite("ToUpperCaseSpec")(
+    suite("ToUpperCaseAvroSpec")(
       testM("topology") {
         for {
           result <- makeDriver.use { driver =>

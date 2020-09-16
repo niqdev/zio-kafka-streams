@@ -267,5 +267,6 @@ https://www.confluent.io/blog/test-kafka-streams-with-topologytestdriver
 https://www.confluent.io/blog/stream-processing-part-2-testing-your-streaming-application
 https://medium.com/bakdata/fluent-kafka-streams-tests-e641785171ec
 https://github.com/embeddedkafka/embedded-kafka-schema-registry
+https://github.com/confluentinc/kafka-streams-examples/blob/5.5.1-post/src/test/java/io/confluent/examples/streams/GenericAvroIntegrationTest.java
 
 -->
