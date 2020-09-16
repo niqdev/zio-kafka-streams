@@ -51,8 +51,7 @@ object KafkaStreamsRuntime {
       setupShutdownHandler *> Task.effect(kafkaStreams.start()) <* setupGracefulShutdown
     }
 
-  // TODO retryN + repeat(Schedule) configurable in Settings
-  // TODO duration
+  // TODO retryN + repeat(Schedule) configurable in AppConfig
   private[this] def stop: KafkaStreams => URIO[Console with KafkaStreamsConfig, Unit] =
     kafkaStreams =>
       putStrLn("Stop runtime ...") *>

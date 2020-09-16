@@ -8,8 +8,7 @@ import org.apache.kafka.streams.scala.kstream._
 import org.apache.kafka.streams.scala.{ ByteArrayKeyValueStore, StreamsBuilder }
 import zio._
 
-// TODO incomplete: globalTable, addStateStore, addGlobalStore, build(props)
-// TODO newtype/refined ?
+// TODO incomplete + tests + docs: globalTable, addStateStore, addGlobalStore, build(props)
 sealed abstract class ZStreamsBuilder(private val builder: StreamsBuilder) {
 
   def streamConsumed[K, V](topic: String): Consumed[K, V] => RIO[KafkaStreamsConfig, ZKStream[K, V]] =

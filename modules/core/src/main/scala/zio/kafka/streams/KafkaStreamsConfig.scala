@@ -36,7 +36,6 @@ object KafkaStreamsConfig {
     } yield schemaRegistryUrl
 }
 
-// TODO Refined ?
 final case class AppConfig(
   applicationId: String,
   bootstrapServers: String,
@@ -71,6 +70,7 @@ final case class AppConfig(
        |\n""".stripMargin
 }
 object AppConfig {
+  // TODO change shutdownTimeout from Long to Duration
   def apply(
     applicationId: String,
     bootstrapServers: String,

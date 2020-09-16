@@ -48,7 +48,7 @@ object GitHubTopology {
 /*
  * Configurations
  */
-// TODO refined/newtype
+// TODO update example with refined/newtype
 final case class GitHubConfig(
   applicationId: String,
   bootstrapServers: String,

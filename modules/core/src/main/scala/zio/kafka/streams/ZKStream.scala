@@ -7,7 +7,7 @@ import org.apache.kafka.streams.scala._
 import org.apache.kafka.streams.scala.kstream._
 import zio._
 
-// TODO incomplete
+// TODO incomplete + tests + docs
 sealed abstract class ZKStream[K, V](private val stream: KStream[K, V]) {
 
   def mapKey[KO](f: K => KO): Task[ZKStream[KO, V]] =

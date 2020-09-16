@@ -20,7 +20,7 @@ object KafkaStreamsTopology {
       .mapEffect(topology =>
         new Service {
           override def build: Task[Topology] =
-            IO.succeed(topology)
+            Task.succeed(topology)
         }
       )
       .toLayer

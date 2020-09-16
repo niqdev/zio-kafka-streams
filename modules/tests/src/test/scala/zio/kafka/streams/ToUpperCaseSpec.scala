@@ -7,6 +7,7 @@ import zio.test.Assertion._
 import zio.test._
 import zio.test.environment.TestEnvironment
 
+// TODO testkit
 object ToUpperCaseSpec extends DefaultRunnableSpec {
 
   private[this] val testConfigLayer: ULayer[KafkaStreamsConfig] =

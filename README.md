@@ -7,7 +7,20 @@
 
 Write [Kafka Streams](https://docs.confluent.io/current/streams/developer-guide/index.html) applications using [ZIO](https://zio.dev) and access the internal state store directly via [GraphQL](https://ghostdogpr.github.io/caliban)
 
-> WIP
+:construction::construction::construction::construction::construction::construction::construction::construction::construction::construction:
+:warning: **Work in Progress** :warning:
+:construction::construction::construction::construction::construction::construction::construction::construction::construction::construction:
+
+Add the following lines to `build.sbt`
+
+```sbt
+libraryDependencies ++= Seq(
+  "???" %% "kafka-streams-serde" % "???",
+  "???" %% "zio-kafka-streams" % "???",
+  "???" %% "zio-kafka-streams-api" % "???",
+  "???" %% "zio-kafka-streams-testkit" % "???" % Test
+)
+```
 
 * [Examples](#examples)
 * [Kafka Streams serdes](#kafka-streams-serde)

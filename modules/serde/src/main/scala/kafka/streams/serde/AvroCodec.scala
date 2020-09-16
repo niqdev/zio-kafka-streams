@@ -11,7 +11,6 @@ import scala.jdk.CollectionConverters.MapHasAsJava
 
 // TODO @implicitNotFound
 trait AvroCodec[T] {
-  // TODO String Refined Url vs String ?
   def serde(schemaRegistryUrl: String): Serde[T]
 }
 
