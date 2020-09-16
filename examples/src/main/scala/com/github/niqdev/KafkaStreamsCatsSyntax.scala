@@ -53,7 +53,7 @@ object dummy {
   }
 }
 
-sealed abstract class CatsTopologyExample[F[_]](implicit F: Sync[F]) {
+sealed abstract class CatsAvroTopologyExample[F[_]](implicit F: Sync[F]) {
   import cats.syntax.flatMap._
   import cats.syntax.functor._
   import dummy._
@@ -69,7 +69,7 @@ sealed abstract class CatsTopologyExample[F[_]](implicit F: Sync[F]) {
       topology          <- F.delay(builder.build())
     } yield topology
 }
-object CatsTopologyExample {
-  def apply[F[_]: Sync]: CatsTopologyExample[F] =
-    new CatsTopologyExample[F] {}
+object CatsAvroTopologyExample {
+  def apply[F[_]: Sync]: CatsAvroTopologyExample[F] =
+    new CatsAvroTopologyExample[F] {}
 }
