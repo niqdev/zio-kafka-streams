@@ -83,7 +83,7 @@ Complete example of [ToUpperCaseApp](https://github.com/niqdev/zio-kafka-streams
 
 ### GitHubApp
 
-Joining avro streams has never been so easy ;-)
+Joining Avro streams integrated with Schema Registry has never been so easy ;-)
 ```scala
 object GitHubTopology {
   private[this] lazy val topology: RIO[KafkaStreamsConfig with CustomConfig with Logging, Topology] =
@@ -226,7 +226,7 @@ final class StreamsBuilderOps[F[_]](private val builder: StreamsBuilder) extends
 }
 ```
 
-Complete example of [KafkaStreamsCatsSyntax](https://github.com/niqdev/zio-kafka-streams/blob/master/examples/src/main/scala/com/github/niqdev/KafkaStreamsCatsSyntax.scala)
+Complete example of [KafkaStreamsCatsApp](https://github.com/niqdev/zio-kafka-streams/blob/master/examples/src/main/scala/com/github/niqdev/KafkaStreamsCatsApp.scala)
 
 ## Development
 
