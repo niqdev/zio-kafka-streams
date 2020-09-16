@@ -82,21 +82,8 @@ sealed trait UserInstances {
   final implicit val ownershipSchemaFor: SchemaFor[Ownership] =
     SchemaFor[Ownership](SchemaFor.StringSchemaFor.schema)
 
-  final implicit val userKeyEncoder: Encoder[UserKey] =
-    Encoder.gen[UserKey]
-  final implicit val userKeyDecoder: Decoder[UserKey] =
-    Decoder.gen[UserKey]
-  final implicit val userKeySchemaFor: SchemaFor[UserKey] =
-    SchemaFor.gen[UserKey]
   final implicit val userKeyAvroCodec: AvroCodec[UserKey] =
     AvroCodec.genericKey[UserKey]
-
-  final implicit val userValueEncoder: Encoder[UserValue] =
-    Encoder.gen[UserValue]
-  final implicit val userValueDecoder: Decoder[UserValue] =
-    Decoder.gen[UserValue]
-  final implicit val userValueSchemaFor: SchemaFor[UserValue] =
-    SchemaFor.gen[UserValue]
   final implicit val userValueAvroCodec: AvroCodec[UserValue] =
     AvroCodec.genericValue[UserValue]
 }

@@ -186,17 +186,10 @@ Complete example of [GitHubApp](https://github.com/niqdev/zio-kafka-streams/blob
 
 How to autoderive an avro serde for keys and values integrated with Confluent [Schema Registry](https://docs.confluent.io/current/schema-registry/index.html) leveraging [avro4s](https://github.com/sksamuel/avro4s)
 ```scala
-import com.sksamuel.avro4s._
 import kafka.streams.serde._
 
-final case class DummyValue(value: String)
+final case class DummyValue(string: String)
 object DummyValue {
-  final implicit val dummyValueEncoder: Encoder[DummyValue] =
-    Encoder.gen[DummyValue]
-  final implicit val dummyValueDecoder: Decoder[DummyValue] =
-    Decoder.gen[DummyValue]
-  final implicit val dummyValueSchemaFor: SchemaFor[DummyValue] =
-    SchemaFor.gen[DummyValue]
   final implicit val dummyValueAvroCodec: AvroCodec[DummyValue] =
     AvroCodec.genericValue[DummyValue]
 }

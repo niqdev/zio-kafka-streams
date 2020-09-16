@@ -3,7 +3,6 @@ package com.github.niqdev.schema
 import com.github.niqdev.schema.GitHubEvent._
 import com.github.niqdev.schema.repository._
 import com.github.niqdev.schema.user._
-import com.sksamuel.avro4s.{ Decoder, Encoder, SchemaFor }
 import kafka.streams.serde.AvroCodec
 
 object GitHubEvent extends GitHubEventInstances {
@@ -41,21 +40,8 @@ object GitHubEvent extends GitHubEventInstances {
 
 sealed trait GitHubEventInstances {
 
-  final implicit val gitHubEventKeyEncoder: Encoder[GitHubEventKey] =
-    Encoder.gen[GitHubEventKey]
-  final implicit val gitHubEventKeyDecoder: Decoder[GitHubEventKey] =
-    Decoder.gen[GitHubEventKey]
-  final implicit val gitHubEventKeySchemaFor: SchemaFor[GitHubEventKey] =
-    SchemaFor.gen[GitHubEventKey]
   final implicit val gitHubEventKeyAvroCodec: AvroCodec[GitHubEventKey] =
     AvroCodec.genericKey[GitHubEventKey]
-
-  final implicit val gitHubEventValueEncoder: Encoder[GitHubEventValue] =
-    Encoder.gen[GitHubEventValue]
-  final implicit val gitHubEventValueDecoder: Decoder[GitHubEventValue] =
-    Decoder.gen[GitHubEventValue]
-  final implicit val gitHubEventValueSchemaFor: SchemaFor[GitHubEventValue] =
-    SchemaFor.gen[GitHubEventValue]
   final implicit val gitHubEventValueAvroCodec: AvroCodec[GitHubEventValue] =
     AvroCodec.genericValue[GitHubEventValue]
 }

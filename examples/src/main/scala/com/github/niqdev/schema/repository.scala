@@ -87,19 +87,9 @@ sealed trait RepositoryInstances {
   final implicit val repositoryUrlSchemaFor: SchemaFor[RepositoryUrl] =
     SchemaFor[RepositoryUrl](SchemaFor.StringSchemaFor.schema)
 
-  final implicit val repositoryKeyEncoder: Encoder[RepositoryKey] =
-    Encoder.gen[RepositoryKey]
-  final implicit val repositoryKeyDecoder: Decoder[RepositoryKey] =
-    Decoder.gen[RepositoryKey]
-  final implicit val repositoryKeySchemaFor: SchemaFor[RepositoryKey] =
-    SchemaFor.gen[RepositoryKey]
   final implicit val repositoryKeyAvroCodec: AvroCodec[RepositoryKey] =
     AvroCodec.genericKey[RepositoryKey]
 
-  final implicit val repositoryValueEncoder: Encoder[RepositoryValue] =
-    Encoder.gen[RepositoryValue]
-  final implicit val repositoryValueDecoder: Decoder[RepositoryValue] =
-    Decoder.gen[RepositoryValue]
   final implicit val repositoryValueSchemaFor: SchemaFor[RepositoryValue] =
     SchemaFor.gen[RepositoryValue]
   final implicit val repositoryValueAvroCodec: AvroCodec[RepositoryValue] =

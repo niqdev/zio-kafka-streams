@@ -9,7 +9,7 @@ object ZKStreamSpec extends DefaultRunnableSpec {
   override def spec: ZSpec[TestEnvironment, Any] =
     suite("ZKStreamSpec")(
       testM("TODO") {
-        assertM(Task.succeed("hello"))(equalTo("aaa"))
+        assertM(Task.succeed("zio"))(equalTo("zio"))
       }
     )
 }
