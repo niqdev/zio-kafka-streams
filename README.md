@@ -5,13 +5,9 @@
 [build-image]: https://travis-ci.org/niqdev/zio-kafka-streams.svg?branch=master
 [build-url]: https://travis-ci.org/niqdev/zio-kafka-streams
 
-Write [Kafka Streams](https://docs.confluent.io/current/streams/developer-guide/index.html) applications using [ZIO](https://zio.dev) and access the internal state store directly via [GraphQL](https://ghostdogpr.github.io/caliban)
+Write and test [Kafka Streams](https://docs.confluent.io/current/streams/developer-guide/index.html) applications using [ZIO](https://zio.dev) and expose the internal state store directly via [GraphQL](https://ghostdogpr.github.io/caliban)
 
-:construction::construction::construction::construction::construction::construction::construction::construction::construction::construction:
-:warning: **Work in Progress** :warning:
-:construction::construction::construction::construction::construction::construction::construction::construction::construction::construction:
-
-Add the following lines to `build.sbt`
+Add the following lines to your `build.sbt`
 
 ```sbt
 libraryDependencies ++= Seq(
@@ -21,6 +17,10 @@ libraryDependencies ++= Seq(
   "???" %% "zio-kafka-streams-testkit" % "???" % Test
 )
 ```
+
+:construction::construction::construction::construction::construction::construction::construction::construction::construction::construction:
+:warning: **Work in Progress** :warning:
+:construction::construction::construction::construction::construction::construction::construction::construction::construction::construction:
 
 * [Examples](#examples)
 * [Kafka Streams serdes](#kafka-streams-serde)
@@ -197,7 +197,7 @@ Complete example of [GitHubApp](https://github.com/niqdev/zio-kafka-streams/blob
 
 `kafka-streams-serde` is an independent module without ZIO dependencies useful to build [Serdes](https://docs.confluent.io/current/streams/developer-guide/datatypes.html) with your favourite effect system
 
-How to autoderive an avro serde for keys and values integrated with Confluent [Schema Registry](https://docs.confluent.io/current/schema-registry/index.html) leveraging [avro4s](https://github.com/sksamuel/avro4s)
+Example of how to autoderive Avro serde for keys and values integrated with Confluent [Schema Registry](https://docs.confluent.io/current/schema-registry/index.html) leveraging [avro4s](https://github.com/sksamuel/avro4s)
 ```scala
 import kafka.streams.serde._
 
