@@ -264,3 +264,15 @@ make topic-offset name=<TOPIC_NAME>
 * [ ] test + documentation
 * [ ] GenerateSchema sbt plugin
 * [ ] replace `kafka-streams-scala` with plain Java?
+
+<!--
+
+# TODO resources
+https://docs.confluent.io/current/streams/developer-guide/test-streams.html
+https://www.confluent.io/blog/testing-kafka-streams
+https://www.confluent.io/blog/test-kafka-streams-with-topologytestdriver
+https://www.confluent.io/blog/stream-processing-part-2-testing-your-streaming-application
+https://medium.com/bakdata/fluent-kafka-streams-tests-e641785171ec
+https://github.com/embeddedkafka/embedded-kafka-schema-registry
+
+-->

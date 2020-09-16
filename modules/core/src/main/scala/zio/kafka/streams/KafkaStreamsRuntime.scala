@@ -8,7 +8,7 @@ import zio.console._
 object KafkaStreamsRuntime {
 
   /**
-    * Initialize Kafka Streams Runtime
+    * Initialize Kafka Streams runtime
     */
   def make: RManaged[Console with KafkaStreamsConfig with KafkaStreamsTopology, KafkaStreams] =
     ZManaged.make(setup)(stop)

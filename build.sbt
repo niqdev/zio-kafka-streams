@@ -45,14 +45,19 @@ lazy val serde = project
     )
   )
 
+// TODO zio-kafka-streams-testkit module
 lazy val core = project
   .in(file("modules/core"))
   .dependsOn(serde)
   .settings(commonSettings)
   .settings(
     name := "zio-kafka-streams",
+    testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")),
     libraryDependencies ++= Seq(
-      "dev.zio" %% "zio" % V.zio
+      "dev.zio"         %% "zio"                      % V.zio,
+      "org.apache.kafka" % "kafka-streams-test-utils" % V.kafka % Test,
+      "dev.zio"         %% "zio-test"                 % V.zio   % Test,
+      "dev.zio"         %% "zio-test-sbt"             % V.zio   % Test
     )
   )
 
