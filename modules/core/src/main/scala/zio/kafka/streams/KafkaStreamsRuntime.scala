@@ -19,55 +19,49 @@ object KafkaStreamsRuntime {
       topology     <- KafkaStreamsTopology.build
       _            <- putStrLn("Setup runtime ...")
       properties   <- KafkaStreamsConfig.config.flatMap(_.toJavaProperties)
-      kafkaStreams <- ZIO.effect(new KafkaStreams(topology, properties))
+      kafkaStreams <- Task.effect(new KafkaStreams(topology, properties))
       _            <- putStrLn("Start runtime ...")
       _            <- startKafkaStreams(kafkaStreams)
     } yield kafkaStreams
 
   private[this] def startKafkaStreams(kafkaStreams: KafkaStreams): Task[KafkaStreams] =
-    ZIO.effectAsyncM { callback =>
+    Task.effectAsyncM { callback =>
 
-      def setupShutdownHandler =
-        ZIO.effect {
+      def setupShutdownHandler: Task[Unit] =
+        Task.effect {
           kafkaStreams
-            .setUncaughtExceptionHandler((_: Thread, throwable: Throwable) => callback(IO.fail(throwable)))
+            .setUncaughtExceptionHandler((_: Thread, throwable: Throwable) => callback(Task.fail(throwable)))
 
           kafkaStreams
             .setStateListener((newState: KafkaStreams.State, _: KafkaStreams.State) =>
               newState match {
                 case KafkaStreams.State.ERROR =>
-                  callback(IO.fail(new IllegalStateException("Shut down application in ERROR state")))
+                  callback(Task.fail(new IllegalStateException("Shut down application in ERROR state")))
                 case KafkaStreams.State.NOT_RUNNING =>
-                  callback(IO.succeed(kafkaStreams))
+                  callback(Task.succeed(kafkaStreams))
                 case _ => ()
               }
             )
         }
 
       // to gracefully shutdown in response to SIGTERM
-      def setupGracefulShutdown =
-        ZIO.effect {
-          java.lang.Runtime.getRuntime.addShutdownHook(new Thread(() => kafkaStreams.close()))
-        }
+      def setupGracefulShutdown: Task[Unit] =
+        Task.effect(java.lang.Runtime.getRuntime.addShutdownHook(new Thread(() => kafkaStreams.close())))
 
-      for {
-        _ <- setupShutdownHandler
-        _ <- ZIO.effect(kafkaStreams.start())
-        _ <- setupGracefulShutdown
-      } yield ()
+      setupShutdownHandler *> Task.effect(kafkaStreams.start()) <* setupGracefulShutdown
     }
 
   // TODO retryN + repeat(Schedule) configurable in Settings
   // TODO duration
   private[this] def stop: KafkaStreams => URIO[Console with KafkaStreamsConfig, Unit] =
     kafkaStreams =>
-      (for {
-        _      <- putStrLn("Stop runtime ...")
-        config <- KafkaStreamsConfig.config
-        _ <-
-          Task
-            .effect(kafkaStreams.close(java.time.Duration.ofSeconds(config.shutdownTimeout)))
-            .retryN(5)
-      } yield ()).catchAll(_ => ZIO.unit)
-
+      putStrLn("Stop runtime ...") *>
+        KafkaStreamsConfig
+          .config
+          .flatMap(config =>
+            Task
+              .effect(kafkaStreams.close(java.time.Duration.ofSeconds(config.shutdownTimeout)))
+              .retryN(5)
+          )
+          .ignore
 }

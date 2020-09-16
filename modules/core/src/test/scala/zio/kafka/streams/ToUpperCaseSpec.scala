@@ -1,13 +1,13 @@
 package zio.kafka.streams
 
-import _root_.kafka.streams.serde._
+import kafka.streams.serde._
 import org.apache.kafka.streams.TopologyTestDriver
 import zio._
 import zio.test.Assertion._
 import zio.test._
 import zio.test.environment.TestEnvironment
 
-object ZKStreamSpec extends DefaultRunnableSpec {
+object ToUpperCaseSpec extends DefaultRunnableSpec {
 
   private[this] val testConfigLayer: ULayer[KafkaStreamsConfig] =
     KafkaStreamsConfig.make(
@@ -43,9 +43,10 @@ object ZKStreamSpec extends DefaultRunnableSpec {
     } yield driver
 
   // TODO check(Gen.alphaNumericString)
+  // TODO driver.close
   override def spec: ZSpec[TestEnvironment, Any] =
-    suite("ZKStreamSpec")(
-      testM("toUpperCase") {
+    suite("ToUpperCaseSpec")(
+      testM("topology") {
         for {
           (source, sink) <- testDriver.flatMap { driver =>
             Task.effect {
@@ -57,6 +58,6 @@ object ZKStreamSpec extends DefaultRunnableSpec {
           _      <- Task.effect(source.pipeInput("myKey", "myValue"))
           result <- Task.effect(sink.readValue())
         } yield assert(result)(equalTo("MYVALUE"))
-      }
-    ).provideSomeLayerShared((testConfigLayer >+> topologyLayer).mapError(TestFailure.fail))
+      }.provideSomeLayerShared((testConfigLayer >+> topologyLayer).mapError(TestFailure.fail))
+    )
 }
