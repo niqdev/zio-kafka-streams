@@ -68,19 +68,6 @@ lazy val testkit = project
     )
   )
 
-lazy val tests = project
-  .in(file("modules/tests"))
-  .dependsOn(testkit)
-  .settings(commonSettings)
-  .settings(
-    name := "tests",
-    testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")),
-    libraryDependencies ++= Seq(
-      "dev.zio"       %% "zio-test-sbt"    % V.zio     % Test,
-      "ch.qos.logback" % "logback-classic" % V.logback % Runtime
-    )
-  )
-
 lazy val examples = project
   .in(file("examples"))
   .dependsOn(core)
@@ -100,6 +87,19 @@ lazy val examples = project
       "io.estatico"         %% "newtype"            % V.newtype,
       "com.beachape"        %% "enumeratum"         % V.enumeratum,
       "ch.qos.logback"       % "logback-classic"    % V.logback % Runtime
+    )
+  )
+
+lazy val tests = project
+  .in(file("modules/tests"))
+  .dependsOn(testkit, examples)
+  .settings(commonSettings)
+  .settings(
+    name := "tests",
+    testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")),
+    libraryDependencies ++= Seq(
+      "dev.zio"       %% "zio-test-sbt"    % V.zio     % Test,
+      "ch.qos.logback" % "logback-classic" % V.logback % Runtime
     )
   )
 

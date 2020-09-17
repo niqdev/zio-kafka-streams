@@ -6,15 +6,16 @@ import zio._
 import zio.kafka.streams._
 
 /*
- * Kafka Streams application
+ * Kafka Streams applications
  */
-object ToUpperCaseApp extends KafkaStreamsApp(ToUpperCaseTopology.layer)
+object ToUpperCaseApp     extends KafkaStreamsApp(ToUpperCaseTopology.layer)
+object ToUpperCaseAvroApp extends KafkaStreamsApp(ToUpperCaseAvroTopology.layer)
 
 /*
- * Topology
+ * Topologies
  */
 object ToUpperCaseTopology {
-  private[this] lazy val topology: RIO[KafkaStreamsConfig with CustomConfig, Topology] =
+  lazy val topology: RIO[KafkaStreamsConfig with CustomConfig, Topology] =
     for {
       sourceTopic <- CustomConfig.sourceTopic
       sinkTopic   <- CustomConfig.sinkTopic
@@ -23,6 +24,25 @@ object ToUpperCaseTopology {
           sourceStream <- builder.stream[String, String](sourceTopic)
           sinkStream   <- sourceStream.mapValue(_.toUpperCase)
           _            <- sinkStream.to(sinkTopic)
+        } yield ()
+      }
+    } yield topology
+
+  val layer: RLayer[ZEnv, KafkaStreamsTopology with KafkaStreamsConfig] =
+    ToUpperCaseConfig.layer >+> KafkaStreamsTopology.make(topology)
+}
+object ToUpperCaseAvroTopology {
+  import com.github.niqdev.schema.dummy._
+
+  lazy val topology: RIO[KafkaStreamsConfig with CustomConfig, Topology] =
+    for {
+      sourceTopic <- CustomConfig.sourceTopic
+      sinkTopic   <- CustomConfig.sinkTopic
+      topology <- ZStreamsBuilder { builder =>
+        for {
+          sourceStream <- builder.streamAvro[DummyKey, DummyValue](sourceTopic)
+          sinkStream   <- sourceStream.mapValue(dummy => DummyValue(dummy.value.toUpperCase))
+          _            <- sinkStream.toAvro(sinkTopic)
         } yield ()
       }
     } yield topology
@@ -66,7 +86,7 @@ object ToUpperCaseConfig {
       )
     )
 
-  private[this] lazy val customConfigLayer: ULayer[CustomConfig] =
+  lazy val customConfigLayer: ULayer[CustomConfig] =
     ZLayer.succeed(new CustomConfig.Service {
       override def sourceTopic: Task[String] =
         UIO.succeed("example.source.v1")

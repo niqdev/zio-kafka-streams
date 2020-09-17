@@ -43,22 +43,9 @@ final class KStreamOps[F[_], K, V](private val kStream: KStream[K, V]) extends A
     }
 }
 
-object dummy {
-  final case class DummyKey(uuid: java.util.UUID)
-  object DummyKey {
-    final implicit val dummyKeyAvroCodec: AvroCodec[DummyKey] =
-      AvroCodec.genericKey[DummyKey]
-  }
-  final case class DummyValue(value: String)
-  object DummyValue {
-    final implicit val dummyValueAvroCodec: AvroCodec[DummyValue] =
-      AvroCodec.genericValue[DummyValue]
-  }
-}
-
 sealed abstract class CatsAvroTopology[F[_]](implicit F: Sync[F]) {
-  import dummy._
-  import syntax._
+  import com.github.niqdev.schema.dummy._
+  import com.github.niqdev.syntax._
 
   // IN -> OUT
   def buildTopology: F[Topology] =

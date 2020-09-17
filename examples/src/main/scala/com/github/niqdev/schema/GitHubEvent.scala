@@ -1,4 +1,5 @@
-package com.github.niqdev.schema
+package com.github.niqdev
+package schema
 
 import com.github.niqdev.schema.GitHubEvent._
 import com.github.niqdev.schema.repository._

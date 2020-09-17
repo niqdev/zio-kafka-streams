@@ -23,7 +23,8 @@ libraryDependencies ++= Seq(
 :construction::construction::construction::construction::construction::construction::construction::construction::construction::construction:
 
 * [Examples](#examples)
-* [Kafka Streams serdes](#kafka-streams-serde)
+* [Serdes](#serdes)
+* [TestKit](#testkit)
 * [Development](#development)
 * [TODO](#todo)
 
@@ -193,7 +194,7 @@ TOPIC_NAME=example.github.v1
 
 Complete example of [GitHubApp](https://github.com/niqdev/zio-kafka-streams/blob/master/examples/src/main/scala/com/github/niqdev/GitHubApp.scala)
 
-## kafka-streams-serde
+## Serdes
 
 `kafka-streams-serde` is an independent module without ZIO dependencies useful to build [Serdes](https://docs.confluent.io/current/streams/developer-guide/datatypes.html) with your favourite effect system
 
@@ -227,6 +228,10 @@ final class StreamsBuilderOps[F[_]](private val builder: StreamsBuilder) extends
 ```
 
 Complete example of [KafkaStreamsCatsApp](https://github.com/niqdev/zio-kafka-streams/blob/master/examples/src/main/scala/com/github/niqdev/KafkaStreamsCatsApp.scala)
+
+## TestKit
+
+> TODO
 
 ## Development
 

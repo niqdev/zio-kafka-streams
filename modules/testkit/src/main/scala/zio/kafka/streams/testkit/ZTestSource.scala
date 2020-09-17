@@ -17,10 +17,11 @@ sealed abstract class ZTestSource[K, V](private val topic: TestInputTopic[K, V])
       }
     }
 
+  // TODO add warnings: it fails if a not-null key is required e.g. avro message
   def produceValue(value: V): Task[Unit] =
     Task.effect(topic.pipeInput(value))
 
-  def produceValues(values: List[V]): Task[Unit] =
+  def produceValues(values: List[V]): Task[Long] =
     Task.effect {
       values.foldLeft(0L) { (count, value) =>
         topic.pipeInput(value)
