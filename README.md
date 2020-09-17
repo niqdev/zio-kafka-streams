@@ -231,7 +231,25 @@ Complete example of [KafkaStreamsCatsApp](https://github.com/niqdev/zio-kafka-st
 
 ## TestKit
 
-> TODO
+How to test `ToUpperCaseTopology` topology with `ZTestTopology`, `ZTestSource` and `ZTestSink`
+```scala
+testM("topology") {
+  for {
+    sourceTopic <- CustomConfig.sourceTopic
+    sinkTopic   <- CustomConfig.sinkTopic
+    result      <- ZTestTopology.driver.use { driver =>
+      for {
+        source     <- driver.source[String, String](sourceTopic)
+        sink       <- driver.sink[String, String](sinkTopic)
+        _          <- source.produceValue("myValue")
+        dummyValue <- sink.consumeValue
+      } yield dummyValue
+    }
+  } yield assert(result)(equalTo("MYVALUE"))
+}
+```
+
+More examples in the [tests](https://github.com/niqdev/zio-kafka-streams/tree/master/modules/tests/src/test/scala) module
 
 ## Development
 

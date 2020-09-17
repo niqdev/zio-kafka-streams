@@ -86,7 +86,7 @@ sealed abstract class ZTestTopology(private val driver: TopologyTestDriver) {
 
 object ZTestTopology {
 
-  // "mock://" prefix is used internally by GenericAvroSerde
+  // "mock://" prefix is used internally by GenericAvroSerde to mock SchemaRegistryClient
   val testConfigLayer: ULayer[KafkaStreamsConfig] =
     KafkaStreamsConfig.make(
       UIO.succeed(
