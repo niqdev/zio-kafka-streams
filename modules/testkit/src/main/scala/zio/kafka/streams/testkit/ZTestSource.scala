@@ -1,0 +1,35 @@
+package zio.kafka.streams
+package testkit
+
+import org.apache.kafka.streams.TestInputTopic
+import zio._
+
+sealed abstract class ZTestSource[K, V](private val topic: TestInputTopic[K, V]) {
+
+  def produce(key: K, value: V): Task[Unit] =
+    Task.effect(topic.pipeInput(key, value))
+
+  def produceAll(values: List[(K, V)]): Task[Long] =
+    Task.effect {
+      values.foldLeft(0L) { (count, keyValue) =>
+        topic.pipeInput(keyValue._1, keyValue._2)
+        count + 1
+      }
+    }
+
+  def produceValue(value: V): Task[Unit] =
+    Task.effect(topic.pipeInput(value))
+
+  def produceValues(values: List[V]): Task[Unit] =
+    Task.effect {
+      values.foldLeft(0L) { (count, value) =>
+        topic.pipeInput(value)
+        count + 1
+      }
+    }
+}
+object ZTestSource {
+
+  def apply[K, V](topic: TestInputTopic[K, V]): Task[ZTestSource[K, V]] =
+    Task.effect(new ZTestSource[K, V](topic) {})
+}
