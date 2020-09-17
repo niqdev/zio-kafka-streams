@@ -23,8 +23,8 @@ libraryDependencies ++= Seq(
 :construction::construction::construction::construction::construction::construction::construction::construction::construction::construction:
 
 * [Examples](#examples)
-* [Serdes](#serdes)
 * [TestKit](#testkit)
+* [Serdes](#serdes)
 * [Development](#development)
 * [TODO](#todo)
 
@@ -194,6 +194,28 @@ TOPIC_NAME=example.github.v1
 
 Complete example of [GitHubApp](https://github.com/niqdev/zio-kafka-streams/blob/master/examples/src/main/scala/com/github/niqdev/GitHubApp.scala)
 
+## TestKit
+
+How to test [ToUpperCaseTopology](https://github.com/niqdev/zio-kafka-streams/blob/master/examples/src/main/scala/com/github/niqdev/ToUpperCaseApp.scala) topology with `ZTestTopology`, `ZTestSource` and `ZTestSink`
+```scala
+testM("topology") {
+  for {
+    sourceTopic <- CustomConfig.sourceTopic
+    sinkTopic   <- CustomConfig.sinkTopic
+    result      <- ZTestTopology.driver.use { driver =>
+      for {
+        source     <- driver.source[String, String](sourceTopic)
+        sink       <- driver.sink[String, String](sinkTopic)
+        _          <- source.produceValue("myValue")
+        dummyValue <- sink.consumeValue
+      } yield dummyValue
+    }
+  } yield assert(result)(equalTo("MYVALUE"))
+}
+```
+
+More examples in the [tests](https://github.com/niqdev/zio-kafka-streams/tree/master/modules/tests/src/test/scala) module
+
 ## Serdes
 
 `kafka-streams-serde` is an independent module without ZIO dependencies useful to build [Serdes](https://docs.confluent.io/current/streams/developer-guide/datatypes.html) with your favourite effect system
@@ -228,28 +250,6 @@ final class StreamsBuilderOps[F[_]](private val builder: StreamsBuilder) extends
 ```
 
 Complete example of [KafkaStreamsCatsApp](https://github.com/niqdev/zio-kafka-streams/blob/master/examples/src/main/scala/com/github/niqdev/KafkaStreamsCatsApp.scala)
-
-## TestKit
-
-How to test `ToUpperCaseTopology` topology with `ZTestTopology`, `ZTestSource` and `ZTestSink`
-```scala
-testM("topology") {
-  for {
-    sourceTopic <- CustomConfig.sourceTopic
-    sinkTopic   <- CustomConfig.sinkTopic
-    result      <- ZTestTopology.driver.use { driver =>
-      for {
-        source     <- driver.source[String, String](sourceTopic)
-        sink       <- driver.sink[String, String](sinkTopic)
-        _          <- source.produceValue("myValue")
-        dummyValue <- sink.consumeValue
-      } yield dummyValue
-    }
-  } yield assert(result)(equalTo("MYVALUE"))
-}
-```
-
-More examples in the [tests](https://github.com/niqdev/zio-kafka-streams/tree/master/modules/tests/src/test/scala) module
 
 ## Development
 
