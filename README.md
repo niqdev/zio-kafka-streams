@@ -38,7 +38,7 @@ Probably the simplest Kafka Streams application you could think of
 ```scala
 object ToUpperCaseTopology {
   // build the topology
-  private[this] lazy val topology: RIO[KafkaStreamsConfig with CustomConfig, Topology] =
+  lazy val topology: RIO[KafkaStreamsConfig with CustomConfig, Topology] =
     for {
       sourceTopic <- CustomConfig.sourceTopic
       sinkTopic   <- CustomConfig.sinkTopic
@@ -87,7 +87,7 @@ Complete example of [ToUpperCaseApp](https://github.com/niqdev/zio-kafka-streams
 Joining Avro streams integrated with Schema Registry has never been so easy ;-)
 ```scala
 object GitHubTopology {
-  private[this] lazy val topology: RIO[KafkaStreamsConfig with CustomConfig with Logging, Topology] =
+  lazy val topology: RIO[KafkaStreamsConfig with CustomConfig with Logging, Topology] =
     for {
       config <- KafkaStreamsConfig.config
       _      <- log.info(s"Running ${config.applicationId}")
@@ -196,7 +196,7 @@ Complete example of [GitHubApp](https://github.com/niqdev/zio-kafka-streams/blob
 
 ## TestKit
 
-How to test [ToUpperCaseTopology](https://github.com/niqdev/zio-kafka-streams/blob/master/examples/src/main/scala/com/github/niqdev/ToUpperCaseApp.scala) topology with `ZTestTopology`, `ZTestSource` and `ZTestSink`
+How to test [ToUpperCaseTopology](https://github.com/niqdev/zio-kafka-streams/blob/master/examples/src/main/scala/com/github/niqdev/ToUpperCaseApp.scala) topology with `ZTestTopology`, `ZTestInput` and `ZTestOutput`
 ```scala
 testM("topology") {
   for {
@@ -204,14 +204,14 @@ testM("topology") {
     sinkTopic   <- CustomConfig.sinkTopic
     result      <- ZTestTopology.driver.use { driver =>
       for {
-        source     <- driver.source[String, String](sourceTopic)
-        sink       <- driver.sink[String, String](sinkTopic)
-        _          <- source.produceValue("myValue")
-        dummyValue <- sink.consumeValue
+        input      <- driver.createInput[String, String](sourceTopic)
+        output     <- driver.createOutput[String, String](sinkTopic)
+        _          <- input.produceValue("myValue")
+        dummyValue <- output.consumeValue
       } yield dummyValue
     }
   } yield assert(result)(equalTo("MYVALUE"))
-}
+}.provideSomeLayerShared(testLayer)
 ```
 
 More examples in the [tests](https://github.com/niqdev/zio-kafka-streams/tree/master/modules/tests/src/test/scala) module

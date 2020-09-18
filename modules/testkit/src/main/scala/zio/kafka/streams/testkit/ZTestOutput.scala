@@ -6,7 +6,7 @@ import zio._
 
 import scala.jdk.CollectionConverters._
 
-sealed abstract class ZTestSink[K, V](private val topic: TestOutputTopic[K, V]) {
+sealed abstract class ZTestOutput[K, V](private val topic: TestOutputTopic[K, V]) {
 
   private[this] val toKeyValue: KeyValue[K, V] => (K, V) =
     keyValue => keyValue.key -> keyValue.value
@@ -26,8 +26,8 @@ sealed abstract class ZTestSink[K, V](private val topic: TestOutputTopic[K, V]) 
   def size: Task[Long] =
     Task.effect(topic.getQueueSize)
 }
-object ZTestSink {
+object ZTestOutput {
 
-  def apply[K, V](topic: TestOutputTopic[K, V]): Task[ZTestSink[K, V]] =
-    Task.effect(new ZTestSink[K, V](topic) {})
+  def apply[K, V](topic: TestOutputTopic[K, V]): Task[ZTestOutput[K, V]] =
+    Task.effect(new ZTestOutput[K, V](topic) {})
 }

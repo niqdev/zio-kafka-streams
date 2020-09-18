@@ -7,20 +7,20 @@ import zio._
 
 sealed abstract class ZTestTopology(private val driver: TopologyTestDriver) {
 
-  def source[K, V](topic: String)(
+  def createInput[K, V](topic: String)(
     implicit K: Codec[K],
     V: Codec[V]
-  ): Task[ZTestSource[K, V]] =
-    ZTestSource(driver.createInputTopic(topic, K.serde.serializer, V.serde.serializer))
+  ): Task[ZTestInput[K, V]] =
+    ZTestInput(driver.createInputTopic(topic, K.serde.serializer, V.serde.serializer))
 
-  def sourceAvro[K, V](topic: String)(
+  def createAvroInput[K, V](topic: String)(
     implicit K: AvroCodec[K],
     V: AvroCodec[V]
-  ): RIO[KafkaStreamsConfig, ZTestSource[K, V]] =
+  ): RIO[KafkaStreamsConfig, ZTestInput[K, V]] =
     KafkaStreamsConfig
       .requiredSchemaRegistryUrl
       .flatMap(schemaRegistryUrl =>
-        ZTestSource(
+        ZTestInput(
           driver.createInputTopic(
             topic,
             K.serde(schemaRegistryUrl).serializer,
@@ -29,14 +29,14 @@ sealed abstract class ZTestTopology(private val driver: TopologyTestDriver) {
         )
       )
 
-  def sourceAvroValue[K, V](topic: String)(
+  def createAvroValueInput[K, V](topic: String)(
     implicit K: Codec[K],
     V: AvroCodec[V]
-  ): RIO[KafkaStreamsConfig, ZTestSource[K, V]] =
+  ): RIO[KafkaStreamsConfig, ZTestInput[K, V]] =
     KafkaStreamsConfig
       .requiredSchemaRegistryUrl
       .flatMap(schemaRegistryUrl =>
-        ZTestSource(
+        ZTestInput(
           driver.createInputTopic(
             topic,
             K.serde.serializer,
@@ -45,20 +45,20 @@ sealed abstract class ZTestTopology(private val driver: TopologyTestDriver) {
         )
       )
 
-  def sink[K, V](topic: String)(
+  def createOutput[K, V](topic: String)(
     implicit K: Codec[K],
     V: Codec[V]
-  ): Task[ZTestSink[K, V]] =
-    ZTestSink(driver.createOutputTopic(topic, K.serde.deserializer, V.serde.deserializer))
+  ): Task[ZTestOutput[K, V]] =
+    ZTestOutput(driver.createOutputTopic(topic, K.serde.deserializer, V.serde.deserializer))
 
-  def sinkAvro[K, V](topic: String)(
+  def createAvroOutput[K, V](topic: String)(
     implicit K: AvroCodec[K],
     V: AvroCodec[V]
-  ): RIO[KafkaStreamsConfig, ZTestSink[K, V]] =
+  ): RIO[KafkaStreamsConfig, ZTestOutput[K, V]] =
     KafkaStreamsConfig
       .requiredSchemaRegistryUrl
       .flatMap(schemaRegistryUrl =>
-        ZTestSink(
+        ZTestOutput(
           driver.createOutputTopic(
             topic,
             K.serde(schemaRegistryUrl).deserializer,
@@ -67,14 +67,14 @@ sealed abstract class ZTestTopology(private val driver: TopologyTestDriver) {
         )
       )
 
-  def sinkAvroValue[K, V](topic: String)(
+  def createAvroValueOutput[K, V](topic: String)(
     implicit K: Codec[K],
     V: AvroCodec[V]
-  ): RIO[KafkaStreamsConfig, ZTestSink[K, V]] =
+  ): RIO[KafkaStreamsConfig, ZTestOutput[K, V]] =
     KafkaStreamsConfig
       .requiredSchemaRegistryUrl
       .flatMap(schemaRegistryUrl =>
-        ZTestSink(
+        ZTestOutput(
           driver.createOutputTopic(
             topic,
             K.serde.deserializer,

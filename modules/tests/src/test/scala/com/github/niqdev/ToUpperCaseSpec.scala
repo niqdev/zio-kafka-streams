@@ -22,10 +22,10 @@ object ToUpperCaseSpec extends DefaultRunnableSpec {
           sinkTopic   <- CustomConfig.sinkTopic
           result <- ZTestTopology.driver.use { driver =>
             for {
-              source     <- driver.source[String, String](sourceTopic)
-              sink       <- driver.sink[String, String](sinkTopic)
-              _          <- source.produceValue("myValue")
-              dummyValue <- sink.consumeValue
+              input      <- driver.createInput[String, String](sourceTopic)
+              output     <- driver.createOutput[String, String](sinkTopic)
+              _          <- input.produceValue("myValue")
+              dummyValue <- output.consumeValue
             } yield dummyValue
           }
         } yield assert(result)(equalTo("MYVALUE"))

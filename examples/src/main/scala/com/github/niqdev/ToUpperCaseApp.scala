@@ -8,8 +8,8 @@ import zio.kafka.streams._
 /*
  * Kafka Streams applications
  */
-object ToUpperCaseApp     extends KafkaStreamsApp(ToUpperCaseTopology.layer)
-object ToUpperCaseAvroApp extends KafkaStreamsApp(ToUpperCaseAvroTopology.layer)
+object ToUpperCaseApp extends KafkaStreamsApp(ToUpperCaseTopology.layer)
+//object ToUpperCaseAvroApp extends KafkaStreamsApp(ToUpperCaseAvroTopology.layer)
 
 /*
  * Topologies
@@ -31,6 +31,7 @@ object ToUpperCaseTopology {
   val layer: RLayer[ZEnv, KafkaStreamsTopology with KafkaStreamsConfig] =
     ToUpperCaseConfig.layer >+> KafkaStreamsTopology.make(topology)
 }
+// example only for testing purposes
 object ToUpperCaseAvroTopology {
   import com.github.niqdev.schema.dummy._
 

@@ -24,10 +24,10 @@ object ToUpperCaseAvroSpec extends DefaultRunnableSpec {
           sinkTopic   <- CustomConfig.sinkTopic
           result <- ZTestTopology.driver.use { driver =>
             for {
-              source     <- driver.sourceAvro[DummyKey, DummyValue](sourceTopic)
-              sink       <- driver.sinkAvro[DummyKey, DummyValue](sinkTopic)
-              _          <- source.produce(DummyKey(java.util.UUID.randomUUID), DummyValue("myValue"))
-              dummyValue <- sink.consumeValue
+              input      <- driver.createAvroInput[DummyKey, DummyValue](sourceTopic)
+              output     <- driver.createAvroOutput[DummyKey, DummyValue](sinkTopic)
+              _          <- input.produce(DummyKey(java.util.UUID.randomUUID), DummyValue("myValue"))
+              dummyValue <- output.consumeValue
             } yield dummyValue
           }
         } yield assert(result.value)(equalTo("MYVALUE"))

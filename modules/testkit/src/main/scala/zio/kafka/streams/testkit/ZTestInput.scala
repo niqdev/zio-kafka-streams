@@ -4,7 +4,7 @@ package testkit
 import org.apache.kafka.streams.TestInputTopic
 import zio._
 
-sealed abstract class ZTestSource[K, V](private val topic: TestInputTopic[K, V]) {
+sealed abstract class ZTestInput[K, V](private val topic: TestInputTopic[K, V]) {
 
   def produce(key: K, value: V): Task[Unit] =
     Task.effect(topic.pipeInput(key, value))
@@ -29,8 +29,8 @@ sealed abstract class ZTestSource[K, V](private val topic: TestInputTopic[K, V])
       }
     }
 }
-object ZTestSource {
+object ZTestInput {
 
-  def apply[K, V](topic: TestInputTopic[K, V]): Task[ZTestSource[K, V]] =
-    Task.effect(new ZTestSource[K, V](topic) {})
+  def apply[K, V](topic: TestInputTopic[K, V]): Task[ZTestInput[K, V]] =
+    Task.effect(new ZTestInput[K, V](topic) {})
 }
