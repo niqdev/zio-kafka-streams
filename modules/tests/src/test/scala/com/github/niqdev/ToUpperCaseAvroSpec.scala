@@ -15,22 +15,24 @@ object ToUpperCaseAvroSpec extends DefaultRunnableSpec {
     ZTestTopology.testConfigLayer ++ ToUpperCaseConfig.customConfigLayer >+>
       KafkaStreamsTopology.make(ToUpperCaseAvroTopology.topology)
 
-  // TODO use check
   override def spec: ZSpec[TestEnvironment, Any] =
     suite("ToUpperCaseAvroSpec")(
       testM("topology") {
-        for {
-          sourceTopic <- CustomConfig.sourceTopic
-          sinkTopic   <- CustomConfig.sinkTopic
-          result <- ZTestTopology.driver.use { driver =>
-            for {
-              input      <- driver.createAvroInput[DummyKey, DummyValue](sourceTopic)
-              output     <- driver.createAvroOutput[DummyKey, DummyValue](sinkTopic)
-              _          <- input.produce(DummyKey(java.util.UUID.randomUUID), DummyValue("myValue"))
-              dummyValue <- output.consumeValue
-            } yield dummyValue
-          }
-        } yield assert(result.value)(equalTo("MYVALUE"))
-      }.provideSomeLayerShared(testLayer.mapError(TestFailure.fail))
+        checkM(Gen.anyString) { string =>
+          for {
+            sourceTopic <- CustomConfig.sourceTopic
+            sinkTopic   <- CustomConfig.sinkTopic
+            result <- ZTestTopology.driver.use { driver =>
+              for {
+                input      <- driver.createAvroInput[DummyKey, DummyValue](sourceTopic)
+                output     <- driver.createAvroOutput[DummyKey, DummyValue](sinkTopic)
+                _          <- input.produce(DummyKey(java.util.UUID.randomUUID), DummyValue(string))
+                dummyValue <- output.consumeValue
+              } yield dummyValue
+            }
+          } yield assert(result.value)(equalTo(string.toUpperCase))
+        }
+        // specify [TestEnvironment] or it won't compile!
+      }.provideSomeLayerShared[TestEnvironment](testLayer.mapError(TestFailure.fail))
     )
 }
