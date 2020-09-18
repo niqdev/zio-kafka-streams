@@ -2,8 +2,10 @@ package zio.kafka.streams
 package testkit
 
 import kafka.streams.serde._
-import org.apache.kafka.streams.TopologyTestDriver
+import org.apache.kafka.streams.{ Topology, TopologyTestDriver }
 import zio._
+import zio.random.Random
+import zio.test.Gen
 
 sealed abstract class ZTestTopology(private val driver: TopologyTestDriver) {
 
@@ -86,6 +88,9 @@ sealed abstract class ZTestTopology(private val driver: TopologyTestDriver) {
 
 object ZTestTopology {
 
+  val topicNameGen: Gen[Random, String] =
+    Gen.anyUUID.map(_.toString)
+
   // "mock://" prefix is used internally by GenericAvroSerde to mock SchemaRegistryClient
   val testConfigLayer: ULayer[KafkaStreamsConfig] =
     KafkaStreamsConfig.make(
@@ -99,6 +104,16 @@ object ZTestTopology {
       )
     )
 
+  def makeTestLayer(
+    topology: Topology
+  ): TaskLayer[KafkaStreamsConfig with KafkaStreamsTopology] =
+    makeTestLayer(RIO.effect(topology))
+
+  def makeTestLayer(
+    topology: RIO[KafkaStreamsConfig, Topology]
+  ): TaskLayer[KafkaStreamsConfig with KafkaStreamsTopology] =
+    ZTestTopology.testConfigLayer >+> KafkaStreamsTopology.make(topology)
+
   private[this] lazy val setup: RIO[KafkaStreamsTopology with KafkaStreamsConfig, TopologyTestDriver] =
     for {
       properties <- KafkaStreamsConfig.config.flatMap(_.toJavaProperties)
@@ -109,6 +124,49 @@ object ZTestTopology {
   private[this] lazy val stop: TopologyTestDriver => UIO[Unit] =
     driver => Task.effect(driver.close()).ignore
 
+  /**
+    * TODO docs
+    */
   def driver: RManaged[KafkaStreamsTopology with KafkaStreamsConfig, ZTestTopology] =
     ZManaged.make(setup)(stop).map(d => new ZTestTopology(d) {})
+
+  /**
+    * TODO docs
+    */
+  def testTopology[K: Codec, V: Codec](
+    inputTopic: String,
+    outputTopic: String,
+    key: K,
+    value: V
+  ): RIO[KafkaStreamsTopology with KafkaStreamsConfig, (K, V)] =
+    ZTestTopology
+      .driver
+      .use { driver =>
+        for {
+          input    <- driver.createInput[K, V](inputTopic)
+          output   <- driver.createOutput[K, V](outputTopic)
+          _        <- input.produce(key, value)
+          keyValue <- output.consume
+        } yield keyValue
+      }
+
+  /**
+    * TODO docs
+    */
+  def testAvroTopology[K: AvroCodec, V: AvroCodec](
+    inputTopic: String,
+    outputTopic: String,
+    key: K,
+    value: V
+  ): RIO[KafkaStreamsTopology with KafkaStreamsConfig, (K, V)] =
+    ZTestTopology
+      .driver
+      .use { driver =>
+        for {
+          input    <- driver.createAvroInput[K, V](inputTopic)
+          output   <- driver.createAvroOutput[K, V](outputTopic)
+          _        <- input.produce(key, value)
+          keyValue <- output.consume
+        } yield keyValue
+      }
 }
