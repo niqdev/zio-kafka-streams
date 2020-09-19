@@ -92,27 +92,22 @@ object ZTestTopology {
     Gen.anyUUID.map(_.toString)
 
   // "mock://" prefix is used internally by GenericAvroSerde to mock SchemaRegistryClient
-  val testConfigLayer: ULayer[KafkaStreamsConfig] =
+  def testConfigLayer(debug: Boolean = false): ULayer[KafkaStreamsConfig] =
     KafkaStreamsConfig.make(
       UIO.succeed(
         AppConfig(
           applicationId = s"test-app-${java.util.UUID.randomUUID}",
           bootstrapServers = "TEST:12345",
           schemaRegistryUrl = Some("mock://TEST"),
-          debug = true
+          debug = debug
         )
       )
     )
 
-  def makeTestLayer(
-    topology: Topology
-  ): TaskLayer[KafkaStreamsConfig with KafkaStreamsTopology] =
-    makeTestLayer(RIO.effect(topology))
-
-  def makeTestLayer(
+  def testLayer(
     topology: RIO[KafkaStreamsConfig, Topology]
   ): TaskLayer[KafkaStreamsConfig with KafkaStreamsTopology] =
-    ZTestTopology.testConfigLayer >+> KafkaStreamsTopology.make(topology)
+    ZTestTopology.testConfigLayer() >+> KafkaStreamsTopology.make(topology)
 
   private[this] lazy val setup: RIO[KafkaStreamsTopology with KafkaStreamsConfig, TopologyTestDriver] =
     for {
@@ -133,7 +128,7 @@ object ZTestTopology {
   /**
     * TODO docs
     */
-  def testTopology[K: Codec, V: Codec](
+  def testSingleMessage[K: Codec, V: Codec](
     inputTopic: String,
     outputTopic: String,
     key: K,
@@ -153,7 +148,7 @@ object ZTestTopology {
   /**
     * TODO docs
     */
-  def testAvroTopology[K: AvroCodec, V: AvroCodec](
+  def testSingleAvroMessage[K: AvroCodec, V: AvroCodec](
     inputTopic: String,
     outputTopic: String,
     key: K,

@@ -12,7 +12,7 @@ import zio.test.environment.TestEnvironment
 object ToUpperCaseAvroSpec extends DefaultRunnableSpec {
 
   private[this] val testLayer: TaskLayer[KafkaStreamsConfig with CustomConfig with KafkaStreamsTopology] =
-    ZTestTopology.testConfigLayer ++ ToUpperCaseConfig.customConfigLayer >+>
+    ZTestTopology.testConfigLayer() ++ ToUpperCaseConfig.customConfigLayer >+>
       KafkaStreamsTopology.make(ToUpperCaseAvroTopology.topology)
 
   override def spec: ZSpec[TestEnvironment, Any] =
