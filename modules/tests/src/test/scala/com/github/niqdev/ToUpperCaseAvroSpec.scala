@@ -18,19 +18,19 @@ object ToUpperCaseAvroSpec extends DefaultRunnableSpec {
   override def spec: ZSpec[TestEnvironment, Any] =
     suite("ToUpperCaseAvroSpec")(
       testM("topology") {
-        checkM(Gen.anyString) { string =>
+        checkM(Gen.anyUUID, Gen.anyString) { (inputKey, inputValue) =>
           for {
             sourceTopic <- CustomConfig.sourceTopic
             sinkTopic   <- CustomConfig.sinkTopic
-            result <- ZTestTopology.driver.use { driver =>
+            outputValue <- ZTestTopology.driver.use { driver =>
               for {
                 input      <- driver.createAvroInput[DummyKey, DummyValue](sourceTopic)
                 output     <- driver.createAvroOutput[DummyKey, DummyValue](sinkTopic)
-                _          <- input.produce(DummyKey(java.util.UUID.randomUUID), DummyValue(string))
+                _          <- input.produce(DummyKey(inputKey), DummyValue(inputValue))
                 dummyValue <- output.consumeValue
-              } yield dummyValue
+              } yield dummyValue.value
             }
-          } yield assert(result.value)(equalTo(string.toUpperCase))
+          } yield assert(outputValue)(equalTo(inputValue.toUpperCase))
         }
         // specify [TestEnvironment] or it won't compile!
       }.provideSomeLayerShared[TestEnvironment](testLayer.mapError(TestFailure.fail))

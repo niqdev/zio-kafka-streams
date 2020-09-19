@@ -204,15 +204,15 @@ testM("topology") {
   for {
     sourceTopic <- CustomConfig.sourceTopic
     sinkTopic   <- CustomConfig.sinkTopic
-    result      <- ZTestTopology.driver.use { driver =>
+    outputValue <- ZTestTopology.driver.use { driver =>
       for {
-        input      <- driver.createInput[String, String](sourceTopic)
-        output     <- driver.createOutput[String, String](sinkTopic)
-        _          <- input.produceValue("myValue")
-        dummyValue <- output.consumeValue
-      } yield dummyValue
+        input  <- driver.createInput[String, String](sourceTopic)
+        output <- driver.createOutput[String, String](sinkTopic)
+        _      <- input.produceValue("myValue")
+        value  <- output.consumeValue
+      } yield value
     }
-  } yield assert(result)(equalTo("MYVALUE"))
+  } yield assert(outputValue)(equalTo("MYVALUE"))
 }.provideSomeLayerShared(testLayer)
 ```
 
@@ -233,7 +233,7 @@ object DummyValue {
 }
 ```
 
-For more complex examples with [refined](https://github.com/fthomas/refined), [newtype](https://github.com/estatico/scala-newtype), [enumeratum](https://github.com/lloydmeta/enumeratum) and custom types see the [schema](https://github.com/niqdev/zio-kafka-streams/tree/master/examples/src/main/scala/com/github/niqdev/schema) package
+For more examples with [refined](https://github.com/fthomas/refined), [newtype](https://github.com/estatico/scala-newtype), [enumeratum](https://github.com/lloydmeta/enumeratum) and custom types see the [schema](https://github.com/niqdev/zio-kafka-streams/tree/master/examples/src/main/scala/com/github/niqdev/schema) package
 
 Example of how to build a syntax with [Cats Effect](https://typelevel.org/cats-effect) using `Record` and `AvroRecord`
 ```scala

@@ -20,15 +20,15 @@ object ToUpperCaseSpec extends DefaultRunnableSpec {
         for {
           sourceTopic <- CustomConfig.sourceTopic
           sinkTopic   <- CustomConfig.sinkTopic
-          result <- ZTestTopology.driver.use { driver =>
+          outputValue <- ZTestTopology.driver.use { driver =>
             for {
-              input      <- driver.createInput[String, String](sourceTopic)
-              output     <- driver.createOutput[String, String](sinkTopic)
-              _          <- input.produceValue("myValue")
-              dummyValue <- output.consumeValue
-            } yield dummyValue
+              input  <- driver.createInput[String, String](sourceTopic)
+              output <- driver.createOutput[String, String](sinkTopic)
+              _      <- input.produceValue("myValue")
+              value  <- output.consumeValue
+            } yield value
           }
-        } yield assert(result)(equalTo("MYVALUE"))
+        } yield assert(outputValue)(equalTo("MYVALUE"))
       }.provideSomeLayerShared(testLayer.mapError(TestFailure.fail))
     )
 }
