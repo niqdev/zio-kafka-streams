@@ -198,7 +198,7 @@ Complete example of [GitHubApp](https://github.com/niqdev/zio-kafka-streams/blob
 
 How to test [ToUpperCaseTopology](https://github.com/niqdev/zio-kafka-streams/blob/master/examples/src/main/scala/com/github/niqdev/ToUpperCaseApp.scala) topology with `ZTestTopology`, `ZTestInput` and `ZTestOutput`
 ```scala
-// sbt "test:testOnly *ToUpperCaseSpec"
+// LOG_LEVEL=WARN sbt "test:testOnly *ToUpperCaseSpec"
 
 testM("topology") {
   for {

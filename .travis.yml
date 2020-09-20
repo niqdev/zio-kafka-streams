@@ -13,5 +13,8 @@ cache:
     - $HOME/.coursier/cache
     - $HOME/.sbt
 
+env:
+  - LOG_LEVEL=WARN
+
 script:
   - sbt ++$TRAVIS_SCALA_VERSION build

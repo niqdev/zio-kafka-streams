@@ -9,7 +9,7 @@ lazy val V = new {
   val enumeratum = "1.6.1"
   val logback    = "1.2.3"
   val newtype    = "0.4.4"
-  val refined    = "0.9.15"
+  val refined    = "0.9.16"
   val zioConfig  = "1.0.0-RC27"
   val zioLogging = "0.5.1"
 }
@@ -39,9 +39,9 @@ lazy val serde = project
       "confluent" at "https://packages.confluent.io/maven/"
     ),
     libraryDependencies ++= Seq(
-      "org.apache.kafka"    %% "kafka-streams-scala"      % V.kafka,
+      "com.sksamuel.avro4s" %% "avro4s-core"              % V.avro4s,
       "io.confluent"         % "kafka-streams-avro-serde" % V.confluent,
-      "com.sksamuel.avro4s" %% "avro4s-core"              % V.avro4s
+      "org.apache.kafka"    %% "kafka-streams-scala"      % V.kafka
     )
   )
 
@@ -78,14 +78,14 @@ lazy val examples = project
       "-Ymacro-annotations"
     ),
     libraryDependencies ++= Seq(
+      "com.sksamuel.avro4s" %% "avro4s-refined"     % V.avro4s,
       "org.typelevel"       %% "cats-effect"        % V.catsEffect,
+      "com.beachape"        %% "enumeratum"         % V.enumeratum,
+      "io.estatico"         %% "newtype"            % V.newtype,
+      "eu.timepit"          %% "refined"            % V.refined,
       "dev.zio"             %% "zio-logging"        % V.zioLogging,
       "dev.zio"             %% "zio-config"         % V.zioConfig,
       "dev.zio"             %% "zio-config-refined" % V.zioConfig,
-      "eu.timepit"          %% "refined"            % V.refined,
-      "com.sksamuel.avro4s" %% "avro4s-refined"     % V.avro4s,
-      "io.estatico"         %% "newtype"            % V.newtype,
-      "com.beachape"        %% "enumeratum"         % V.enumeratum,
       "ch.qos.logback"       % "logback-classic"    % V.logback % Runtime
     )
   )
