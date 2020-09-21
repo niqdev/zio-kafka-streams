@@ -11,7 +11,7 @@ lazy val V = new {
   val newtype    = "0.4.4"
   val refined    = "0.9.16"
   val zioConfig  = "1.0.0-RC27"
-  val zioLogging = "0.5.1"
+  val zioLogging = "0.5.2"
 }
 
 lazy val commonSettings = Seq(

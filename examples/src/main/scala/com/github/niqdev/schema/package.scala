@@ -4,10 +4,15 @@ import java.time.Instant
 import java.util.UUID
 
 import com.sksamuel.avro4s._
+import eu.timepit.refined.api.{ Refined, RefinedTypeOps }
+import eu.timepit.refined.string.Uuid
 import eu.timepit.refined.types.string.NonEmptyString
 import io.estatico.newtype.macros.newtype
 
 package object schema {
+
+  final type UuidString = String Refined Uuid
+  final object UuidString extends RefinedTypeOps[UuidString, String]
 
   final implicit val snake: FieldMapper = SnakeCase
 

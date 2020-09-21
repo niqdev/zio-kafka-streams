@@ -1,17 +1,42 @@
 package kafka.streams.serde
 
-import org.apache.kafka.common.serialization.Serde
+import org.apache.kafka.common.serialization.{ Deserializer, Serde, Serializer, Serdes => JSerdes }
 import org.apache.kafka.streams.scala.Serdes
 
 trait Codec[T] {
   def serde: Serde[T]
+
+  // map Codec[T] to Codec[C]
+  def cmap[C](s: C => T, d: T => Option[C])(
+    implicit codec: Codec[T]
+  ): Codec[C] =
+    Codec.instance[C](
+      JSerdes.serdeFrom(
+        new Serializer[C] {
+          override def serialize(topic: String, data: C): Array[Byte] =
+            codec.serde.serializer().serialize(topic, s(data))
+          override def configure(configs: java.util.Map[String, _], isKey: Boolean): Unit = ()
+          override def close(): Unit                                                      = ()
+        },
+        new Deserializer[C] {
+          // TODO ".get" throws exceptions
+          // see org.apache.kafka.streams.scala.Serdes.fromFn
+          // "orNull" requires an implicit instance of Null and [C >: Null] constraint
+          // which doesn't compile with Refined and newtype
+          override def deserialize(topic: String, data: Array[Byte]): C =
+            Either.catchNonFatal(codec.serde.deserializer().deserialize(topic, data)).toOption.flatMap(d).get
+          override def configure(configs: java.util.Map[String, _], isKey: Boolean): Unit = ()
+          override def close(): Unit                                                      = ()
+        }
+      )
+    )
 }
 
 // TODO circe/zio-json + xml-spac + Refined
 object Codec {
   def apply[T](implicit ev: Codec[T]): Codec[T] = ev
 
-  private[this] def instance[T](serdeInstance: Serde[T]): Codec[T] =
+  def instance[T](serdeInstance: Serde[T]): Codec[T] =
     new Codec[T] {
       override def serde: Serde[T] =
         serdeInstance
