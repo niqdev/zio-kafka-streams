@@ -8,7 +8,11 @@ import org.apache.kafka.streams.scala.kstream._
 import zio._
 
 // TODO incomplete + tests + docs
+// TODO ZKGroupedStream
 sealed abstract class ZKStream[K, V](private val stream: KStream[K, V]) {
+
+  def map[KO, VO](f: (K, V) => (KO, VO)): Task[ZKStream[KO, VO]] =
+    ZKStream(stream.map(f))
 
   def mapKey[KO](f: K => KO): Task[ZKStream[KO, V]] =
     ZKStream(stream.map((key, value) => f(key) -> value))
@@ -16,8 +20,19 @@ sealed abstract class ZKStream[K, V](private val stream: KStream[K, V]) {
   def mapValue[VO](f: V => VO): Task[ZKStream[K, VO]] =
     ZKStream(stream.mapValues(f))
 
-  def map[KO, VO](f: (K, V) => (KO, VO)): Task[ZKStream[KO, VO]] =
-    ZKStream(stream.map(f))
+  // TODO foreach async
+  def tap(a: (K, V) => Task[Unit]): Task[ZKStream[K, V]] = ???
+
+  def filter(p: (K, V) => Boolean): Task[ZKStream[K, V]] =
+    ZKStream(stream.filter(p))
+
+  def filterNot(p: (K, V) => Boolean): Task[ZKStream[K, V]] =
+    ZKStream(stream.filterNot(p))
+
+  def span(p: (K, V) => Boolean): Task[(ZKStream[K, V], ZKStream[K, V])] =
+    Task.effect(stream.branch(p)).map { branches =>
+      (ZKStream.newInstance(branches(0)), ZKStream.newInstance(branches(1)))
+    }
 
   def toProduced(topic: String): Produced[K, V] => RIO[KafkaStreamsConfig, Unit] =
     produced =>
@@ -56,6 +71,9 @@ sealed abstract class ZKStream[K, V](private val stream: KStream[K, V]) {
 
 object ZKStream {
 
+  def newInstance[K, V](stream: KStream[K, V]): ZKStream[K, V] =
+    new ZKStream[K, V](stream) {}
+
   def apply[K, V](stream: KStream[K, V]): Task[ZKStream[K, V]] =
-    Task.effect(new ZKStream[K, V](stream) {})
+    Task.effect(newInstance(stream))
 }

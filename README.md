@@ -11,10 +11,11 @@ Add the following lines to your `build.sbt`
 
 ```sbt
 libraryDependencies ++= Seq(
-  "???" %% "kafka-streams-serde" % "???",
   "???" %% "zio-kafka-streams" % "???",
   "???" %% "zio-kafka-streams-api" % "???",
-  "???" %% "zio-kafka-streams-testkit" % "???" % Test
+  "???" %% "zio-kafka-streams-testkit" % "???" % Test,
+  "???" %% "kafka-streams-serde" % "???",
+  "???" %% "kafka-datagen" % "???"
 )
 ```
 

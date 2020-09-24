@@ -7,6 +7,7 @@ import org.apache.kafka.streams.scala.kstream._
 import zio._
 
 // TODO incomplete + tests + docs
+// TODO ZKGroupedTable
 sealed abstract class ZKTable[K, V](private val table: KTable[K, V]) {
 
   def joinAvro[VO, VR](other: ZKTable[K, VO])(joiner: (V, VO) => VR)(

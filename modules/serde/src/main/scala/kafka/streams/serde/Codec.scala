@@ -64,4 +64,7 @@ object Codec {
     instance(Serdes.Integer)
   implicit val javaIntegerCodec: Codec[java.lang.Integer] =
     instance(Serdes.JavaInteger)
+
+  implicit val uuidCodec: Codec[java.util.UUID] =
+    stringCodec.cmap(_.toString, string => scala.util.Try(java.util.UUID.fromString(string)).toOption)
 }
