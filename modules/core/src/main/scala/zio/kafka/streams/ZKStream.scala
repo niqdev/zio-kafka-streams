@@ -30,7 +30,7 @@ sealed abstract class ZKStream[K, V](private val stream: KStream[K, V]) {
     ZKStream(stream.filterNot(p))
 
   def span(p: (K, V) => Boolean): Task[(ZKStream[K, V], ZKStream[K, V])] =
-    Task.effect(stream.branch(p)).map { branches =>
+    Task.effect(stream.branch(p, !p(_, _))).map { branches =>
       (ZKStream.newInstance(branches(0)), ZKStream.newInstance(branches(1)))
     }
 
