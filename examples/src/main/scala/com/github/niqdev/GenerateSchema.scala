@@ -11,6 +11,9 @@ import zio.console._
 // TODO sbt-plugin
 object GenerateSchema extends App {
 
+  // make sure it picks properly SnakeCase
+  import com.github.niqdev.schema._
+
   override def run(args: List[String]): URIO[ZEnv, ExitCode] =
     outputSchemas.exitCode
 
