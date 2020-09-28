@@ -258,7 +258,7 @@ Complete example of [KafkaStreamsCatsApp](https://github.com/niqdev/zio-kafka-st
 
 ```bash
 # start containers in background
-# zookeeper|kafka|kafka-rest|kafka-ui|schema-registry|schema-registry-ui
+# zookeeper|kafka|kafka-rest|kafka-ui|schema-registry|schema-registry-ui|kowl
 make local-up
 
 # stop all containers
@@ -275,6 +275,8 @@ make topic-offset name=<TOPIC_NAME>
 [open|xdg-open] http://localhost:8000
 # [mac|linux] schema-registry ui
 [open|xdg-open] http://localhost:8001
+# [mac|linux] kowl (another ui)
+[open|xdg-open] http://localhost:8002
 ```
 
 ## TODO

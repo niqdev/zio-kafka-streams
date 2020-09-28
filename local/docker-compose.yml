@@ -86,7 +86,7 @@ services:
         # install httpie
         pip3 install --user httpie
         # install jq
-        curl -L https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -o .local/bin/jq && chmod u+x .local/bin/jq
+        curl -sL https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -o .local/bin/jq && chmod u+x .local/bin/jq
         # start
         /etc/confluent/docker/run
 
@@ -103,6 +103,33 @@ services:
     environment:
       - SCHEMAREGISTRY_URL=http://schema-registry:8081
       - PROXY=true
+
+  kowl:
+    container_name: local-kowl
+    image: quay.io/cloudhut/kowl:v1.1.0
+    depends_on:
+      - kafka
+    # waits for kafka to be available
+    restart: on-failure
+    ports:
+      - 8002:8080
+    hostname: kowl
+    networks:
+      - local_kafka_network
+    entrypoint:
+      - /bin/ash
+      - -c
+      - |
+        mkdir -p /etc/kowl
+        cat > /etc/kowl/config.yaml <<EOF
+          # See: https://github.com/cloudhut/kowl/tree/master/docs/config for reference config files.
+          kafka:
+            brokers:
+              - kafka:29092
+          server:
+            listenPort: 8080
+        EOF
+        ./kowl --config.filepath=/etc/kowl/config.yaml
 
 networks:
   local_kafka_network:
