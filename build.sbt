@@ -9,7 +9,7 @@ lazy val V = new {
   val enumeratum = "1.6.1"
   val logback    = "1.2.3"
   val newtype    = "0.4.4"
-  val refined    = "0.9.16"
+  val refined    = "0.9.17"
   val zioConfig  = "1.0.0-RC27"
   val zioLogging = "0.5.2"
 }
