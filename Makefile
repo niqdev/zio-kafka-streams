@@ -46,6 +46,14 @@ topic-delete: require-docker check-param-name
 topic-offset: require-docker check-param-name
 	./local/scripts/kafka_apply.sh "topic-offset" ${name}
 
+.PHONY: group-list
+group-list: require-docker
+	./local/scripts/kafka_apply.sh "group-list"
+
+.PHONY: group-offset
+group-offset: require-docker check-param-name
+	./local/scripts/kafka_apply.sh "group-offset" ${name}
+
 .PHONY: schema-generate
 schema-generate: require-sbt
 	rm -f ./local/schema/{*.avsc,*.json}

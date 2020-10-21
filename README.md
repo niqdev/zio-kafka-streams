@@ -270,6 +270,8 @@ make topic-describe name=<TOPIC_NAME>
 make topic-create name=<TOPIC_NAME>
 make topic-delete name=<TOPIC_NAME>
 make topic-offset name=<TOPIC_NAME>
+make group-list
+make group-offset name=<GROUP_NAME>
 
 # [mac|linux] kafka ui
 [open|xdg-open] http://localhost:8000

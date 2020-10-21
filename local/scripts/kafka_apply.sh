@@ -69,13 +69,11 @@ case ${PARAM_ACTION} in
       --time -1 \
       --topic ${PARAM_TOPIC_NAME}"
   ;;
-  # TODO not used
   "group-list")
     kafka_exec "kafka-consumer-groups \
       --bootstrap-server ${BOOTSTRAP_SERVERS} \
       --list"
   ;;
-  # TODO not used
   "group-offset")
     PARAM_GROUP_NAME=${2:?"Missing GROUP_NAME"}
     echo "[*] GROUP_NAME=${PARAM_GROUP_NAME}"
