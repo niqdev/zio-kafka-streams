@@ -5,17 +5,17 @@
 [build-image]: https://travis-ci.org/niqdev/zio-kafka-streams.svg?branch=master
 [build-url]: https://travis-ci.org/niqdev/zio-kafka-streams
 
-Write and test [Kafka Streams](https://docs.confluent.io/current/streams/developer-guide/index.html) applications using [ZIO](https://zio.dev) and expose the internal state store directly via [GraphQL](https://ghostdogpr.github.io/caliban)
+Write and test [Kafka Streams](https://docs.confluent.io/current/streams/developer-guide/index.html) applications using [ZIO](https://zio.dev) ~~and expose the internal state store directly via [GraphQL](https://ghostdogpr.github.io/caliban)~~
 
 Add the following lines to your `build.sbt`
 
 ```sbt
 libraryDependencies ++= Seq(
-  "???" %% "zio-kafka-streams" % "???",
-  "???" %% "zio-kafka-streams-api" % "???",
-  "???" %% "zio-kafka-streams-testkit" % "???" % Test,
-  "???" %% "kafka-streams-serde" % "???",
-  "???" %% "kafka-datagen" % "???"
+  "???" %% "zio-kafka-streams" % "???", // core DONE, incomplete api and tests
+  "???" %% "zio-kafka-streams-api" % "???", // TODO graphQL (?)
+  "???" %% "zio-kafka-streams-testkit" % "???" % Test, // core DONE, incomplete api and tests
+  "???" %% "kafka-streams-serde" % "???", // DONE, missing tests
+  "???" %% "kafka-datagen" % "???" // TODO
 )
 ```
 
@@ -283,23 +283,18 @@ make group-offset name=<GROUP_NAME>
 
 ## TODO
 
-* [ ] (zio) [newtype](https://github.com/zio/zio-prelude/blob/d34b5c0e74557edd8709f7c45b40297bf4280d77/src/main/scala/zio/prelude/NewtypeModule.scala) + refined ?
+* [ ] zio-prelude e.g. [newtype](https://github.com/zio/zio-prelude/blob/d34b5c0e74557edd8709f7c45b40297bf4280d77/src/main/scala/zio/prelude/NewtypeModule.scala) or refined ?
 * [ ] kafkacat docker
-* [ ] local kafka setup
-* [ ] examples
-* [ ] avro serde with confluent schema-registry
 * [ ] json serde with circe/zio-json
-* [ ] core wrappers
 * [ ] interop-cats
 * [ ] api with Caliban (pagination + subscriptions)
     - [Kafka Streams Interactive Queries](https://docs.confluent.io/current/streams/developer-guide/interactive-queries.html)
 * [ ] metrics with Prometheus
-* [ ] testkit
-* [ ] generator with magnolia for testing
 * [ ] helm chart StatefulSet
-* [ ] test + documentation
-* [ ] GenerateSchema sbt plugin
-* [ ] replace `kafka-streams-scala` with plain Java?
+* [ ] convert GenerateSchema into sbt plugin
+* [ ] replace `kafka-streams-scala` with plain Java or zio-kafka?
+* [ ] topology description with [eisner](https://github.com/laserdisc-io/eisner)
+* [ ] Scala 3 compatibility
 
 <!--
 
