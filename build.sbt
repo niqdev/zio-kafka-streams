@@ -76,8 +76,9 @@ lazy val datagen = project
   .settings(
     name := "kafka-datagen",
     libraryDependencies ++= Seq(
-      "dev.zio" %% "zio-kafka"   % V.zioKafka,
-      "dev.zio" %% "zio-test"    % V.zio
+      "dev.zio" %% "zio-kafka"         % V.zioKafka,
+      "dev.zio" %% "zio-test"          % V.zio,
+      "dev.zio" %% "zio-test-magnolia" % V.zio
     )
   )
 
