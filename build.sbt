@@ -84,7 +84,7 @@ lazy val datagen = project
 
 lazy val examples = project
   .in(file("examples"))
-  .dependsOn(core)
+  .dependsOn(core, datagen)
   .settings(commonSettings)
   .settings(
     name := "examples",
