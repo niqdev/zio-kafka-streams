@@ -10,13 +10,29 @@ import zio.kafka.serde.Serializer
 import zio.test.Sized
 import zio.test.magnolia.DeriveGen
 
-// https://github.com/zio/zio/blob/master/test-magnolia-tests/shared/src/test/scala/zio/test/magnolia/DeriveGenSpec.scala
-object KafkaGen {
+// TODO doesn't compile: issue with Sized
+/*
+abstract class KafkaGenApp[K, V](
+  producerSettingsLayer: ZLayer[Any, Throwable, Producer[Any, K, V]]
+) extends App {
 
-  def avroProducerSettingsLayer[K >: Null: Encoder: Decoder: Tag, V >: Null: Encoder: Decoder: Tag](
-    bootstrapServer: String,
-    schemaRegistryUrl: String
-  ) =
+  protected val genSize: Int = 1000
+
+  def produce: RIO[ZEnv with Producer[Any, K, V] with Sized, Unit]
+
+  override def run(args: List[String]): URIO[ZEnv, ExitCode] =
+    produce.provideCustomLayer(producerSettingsLayer ++ Sized.live(genSize)).exitCode
+}
+ */
+
+// TODO case class vs object ?
+final case class AvroProducerSettings(
+  bootstrapServer: String,
+  schemaRegistryUrl: String
+) {
+
+  def layer[K >: Null: Encoder: Decoder: Tag, V >: Null: Encoder: Decoder: Tag]
+    : ZLayer[Any, Throwable, Producer[Any, K, V]] =
     Producer
       .make(
         ProducerSettings(List(bootstrapServer)),
@@ -24,6 +40,10 @@ object KafkaGen {
         Serializer(AvroCodec.genericValue[V].serde(schemaRegistryUrl).serializer())
       )
       .toLayer
+}
+
+// https://github.com/zio/zio/blob/master/test-magnolia-tests/shared/src/test/scala/zio/test/magnolia/DeriveGenSpec.scala
+object KafkaGen {
 
   def produceAvro[K: Tag: DeriveGen, V: Tag: DeriveGen](
     topic: String
