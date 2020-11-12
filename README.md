@@ -15,7 +15,7 @@ libraryDependencies ++= Seq(
   "???" %% "zio-kafka-streams-api" % "???", // TODO graphQL (?)
   "???" %% "zio-kafka-streams-testkit" % "???" % Test, // core DONE, incomplete api and tests
   "???" %% "kafka-streams-serde" % "???", // DONE, missing tests
-  "???" %% "kafka-datagen" % "???" // TODO
+  "???" %% "kafka-datagen" % "???" // TODO incomplete
 )
 ```
 
@@ -26,6 +26,7 @@ libraryDependencies ++= Seq(
 * [Examples](#examples)
 * [TestKit](#testkit)
 * [Serdes](#serdes)
+* [DataGen](#datagen)
 * [Development](#development)
 * [TODO](#todo)
 
@@ -253,6 +254,14 @@ final class StreamsBuilderOps[F[_]](private val builder: StreamsBuilder) extends
 ```
 
 Complete example of [KafkaStreamsCatsApp](https://github.com/niqdev/zio-kafka-streams/blob/master/examples/src/main/scala/com/github/niqdev/KafkaStreamsCatsApp.scala)
+
+## DataGen
+
+> TODO
+
+```bash
+LOG_LEVEL=INFO sbt "examples/runMain com.github.niqdev.SimpleKafkaGenApp"
+```
 
 ## Development
 
