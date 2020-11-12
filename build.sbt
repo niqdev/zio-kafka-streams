@@ -1,5 +1,5 @@
 lazy val V = new {
-  val avro4s    = "4.0.0"
+  val avro4s    = "4.0.1"
   val confluent = "6.0.0"
   val kafka     = "2.6.0"
   val zio       = "1.0.3"
@@ -12,6 +12,7 @@ lazy val V = new {
   val refined    = "0.9.17"
   val zioConfig  = "1.0.0-RC29"
   val zioLogging = "0.5.3"
+  val zioKafka   = "0.13.0"
 }
 
 lazy val commonSettings = Seq(
@@ -68,9 +69,22 @@ lazy val testkit = project
     )
   )
 
+lazy val datagen = project
+  .in(file("modules/datagen"))
+  .dependsOn(serde)
+  .settings(commonSettings)
+  .settings(
+    name := "kafka-datagen",
+    libraryDependencies ++= Seq(
+      "dev.zio" %% "zio-kafka"         % V.zioKafka,
+      "dev.zio" %% "zio-test"          % V.zio,
+      "dev.zio" %% "zio-test-magnolia" % V.zio
+    )
+  )
+
 lazy val examples = project
   .in(file("examples"))
-  .dependsOn(core)
+  .dependsOn(core, datagen)
   .settings(commonSettings)
   .settings(
     name := "examples",
@@ -105,7 +119,7 @@ lazy val tests = project
 
 lazy val root = project
   .in(file("."))
-  .aggregate(serde, core, testkit, tests, examples)
+  .aggregate(serde, core, testkit, datagen, tests, examples)
   .settings(
     name := "zio-kafka-streams-root",
     addCommandAlias("checkFormat", ";scalafmtCheckAll;scalafmtSbtCheck"),
