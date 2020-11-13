@@ -294,7 +294,8 @@ make group-offset name=<GROUP_NAME>
 
 * [ ] zio-prelude e.g. [newtype](https://github.com/zio/zio-prelude/blob/d34b5c0e74557edd8709f7c45b40297bf4280d77/src/main/scala/zio/prelude/NewtypeModule.scala) or refined ?
 * [ ] kafkacat docker
-* [ ] json serde with circe/zio-json
+    - `docker run --rm --name kafkacat edenhill/kafkacat:1.6.0`
+* [ ] json serde with circe/zio-json + xml serde (?)
 * [ ] interop-cats
 * [ ] api with Caliban (pagination + subscriptions)
     - [Kafka Streams Interactive Queries](https://docs.confluent.io/current/streams/developer-guide/interactive-queries.html)

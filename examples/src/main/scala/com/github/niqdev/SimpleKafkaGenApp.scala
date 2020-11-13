@@ -20,6 +20,7 @@ object SimpleKafkaGenApp extends KafkaGenApp(SimpleKafkaGen.producerSettingsLaye
     SimpleKafkaGen.repeatWithDelay
 }
 
+// TODO kafka header: trackingId
 object SimpleKafkaGen {
 
   val producerSettingsLayer: TaskLayer[Producer[Any, MyKey, MyValue]] =

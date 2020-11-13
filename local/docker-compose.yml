@@ -104,6 +104,7 @@ services:
       - SCHEMAREGISTRY_URL=http://schema-registry:8081
       - PROXY=true
 
+  # TODO replace kafka-ui and schema-registry-ui
   kowl:
     container_name: local-kowl
     image: quay.io/cloudhut/kowl:v1.1.0
@@ -126,6 +127,11 @@ services:
           kafka:
             brokers:
               - kafka:29092
+          # TODO wait for 1.2.0 release
+          #schemaRegistry:
+          #  enabled: true
+          #  urls:
+          #    - http://schema-registry:8081
           server:
             listenPort: 8080
         EOF
