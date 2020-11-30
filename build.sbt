@@ -11,13 +11,13 @@ lazy val V = new {
   val logback    = "1.2.3"
   val newtype    = "0.4.4"
   val refined    = "0.9.18"
-  val zioConfig  = "1.0.0-RC29"
+  val zioConfig  = "1.0.0-RC30-1"
   val zioLogging = "0.5.3"
 }
 
 lazy val commonSettings = Seq(
   organization := "com.github.niqdev",
-  scalaVersion := "2.13.3",
+  scalaVersion := "2.13.4",
   scalacOptions ++= Seq(
     "-encoding",
     "UTF-8",
