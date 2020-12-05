@@ -1,5 +1,5 @@
 lazy val V = new {
-  val avro4s    = "4.0.1"
+  val avro4s    = "4.0.3"
   val confluent = "6.0.0"
   val kafka     = "2.6.0"
   val zio       = "1.0.3"
@@ -11,8 +11,8 @@ lazy val V = new {
   val logback    = "1.2.3"
   val newtype    = "0.4.4"
   val refined    = "0.9.18"
-  val zioConfig  = "1.0.0-RC30-1"
-  val zioLogging = "0.5.3"
+  val zioConfig  = "1.0.0-RC31"
+  val zioLogging = "0.5.4"
 }
 
 lazy val commonSettings = Seq(
