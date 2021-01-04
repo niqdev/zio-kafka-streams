@@ -107,7 +107,7 @@ services:
   # TODO replace kafka-rest+kafka-ui and schema-registry-ui
   kowl:
     container_name: local-kowl
-    image: quay.io/cloudhut/kowl:v1.2.1
+    image: quay.io/cloudhut/kowl:v1.2.2
     depends_on:
       - kafka
       - schema-registry

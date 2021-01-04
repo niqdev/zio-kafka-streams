@@ -1,5 +1,5 @@
 lazy val V = new {
-  val avro4s    = "4.0.3"
+  val avro4s    = "4.0.4"
   val confluent = "6.0.0"
   val kafka     = "2.6.0"
   val zio       = "1.0.3"
