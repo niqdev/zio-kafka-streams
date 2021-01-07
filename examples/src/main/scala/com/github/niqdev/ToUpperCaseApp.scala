@@ -22,7 +22,7 @@ object ToUpperCaseTopology {
       topology <- ZStreamsBuilder { builder =>
         for {
           sourceStream <- builder.stream[String, String](sourceTopic)
-          sinkStream   <- sourceStream.mapValue(_.toUpperCase)
+          sinkStream   <- sourceStream.mapValue(_.length)
           _            <- sinkStream.to(sinkTopic)
         } yield ()
       }
@@ -81,6 +81,50 @@ object ToUpperCaseConfig {
       UIO.succeed(
         AppConfig(
           applicationId = "to-upper-case",
+          bootstrapServers = "localhost:9092",
+          debug = true
+        )
+      )
+    )
+
+  lazy val customConfigLayer: ULayer[CustomConfig] =
+    ZLayer.succeed(new CustomConfig.Service {
+      override def sourceTopic: Task[String] =
+        UIO.succeed("example.source.v1")
+      override def sinkTopic: Task[String] =
+        UIO.succeed("example.sink.v1")
+    })
+
+  lazy val layer: ULayer[KafkaStreamsConfig with CustomConfig] =
+    configLayer ++ customConfigLayer
+}
+
+final case class ToCountCharsConfig(
+  applicationId: String,
+  bootstrapServers: String,
+  sourceTopic: String,
+  sinkTopic: String
+)
+object ToCountCharsConfig {
+  type CustomConfig = Has[CustomConfig.Service]
+
+  object CustomConfig {
+    trait Service {
+      def sourceTopic: Task[String]
+      def sinkTopic: Task[String]
+    }
+
+    def sourceTopic: RIO[CustomConfig, String] =
+      ZIO.accessM[CustomConfig](_.get.sourceTopic)
+    def sinkTopic: RIO[CustomConfig, String] =
+      ZIO.accessM[CustomConfig](_.get.sinkTopic)
+  }
+
+  private[this] lazy val configLayer: ULayer[KafkaStreamsConfig] =
+    KafkaStreamsConfig.make(
+      UIO.succeed(
+        AppConfig(
+          applicationId = "to-count-chars",
           bootstrapServers = "localhost:9092",
           debug = true
         )

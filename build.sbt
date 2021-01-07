@@ -53,7 +53,8 @@ lazy val core = project
   .settings(
     name := "zio-kafka-streams",
     libraryDependencies ++= Seq(
-      "dev.zio" %% "zio" % V.zio
+      "dev.zio" %% "zio"         % V.zio,
+      "dev.zio" %% "zio-prelude" % "latest.integration"
     )
   )
 
@@ -84,7 +85,7 @@ lazy val datagen = project
 
 lazy val examples = project
   .in(file("examples"))
-  .dependsOn(core, datagen)
+  .dependsOn(core, datagen, testkit)
   .settings(commonSettings)
   .settings(
     name := "examples",
