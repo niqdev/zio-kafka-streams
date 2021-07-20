@@ -63,6 +63,14 @@ schema-generate: require-sbt
 schema-register: require-docker require-jq check-param-name
 	./local/scripts/kafka_apply.sh "schema-register" ${name}
 
+.PHONY: produce-avro
+produce-avro: require-docker check-param-schema-key-id check-param-schema-value-id check-param-topic-name check-param-event-name
+	./local/scripts/kafka_apply.sh "produce-avro" ${schema-key-id} ${schema-value-id} ${topic-name} ${event-name}
+
+.PHONY: produce-avro-value
+produce-avro-value: require-docker check-param-schema-value-id check-param-topic-name check-param-event-name
+	./local/scripts/kafka_apply.sh "produce-avro-value" ${schema-value-id} ${topic-name} ${event-name}
+
 .PHONY: format-data
 format-data: require-jq check-param-name
 	./local/scripts/format_data.sh ${name}

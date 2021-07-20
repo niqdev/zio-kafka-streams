@@ -290,6 +290,38 @@ make group-offset name=<GROUP_NAME>
 [open|xdg-open] http://localhost:8002
 ```
 
+How to build an event manually
+
+```bash
+# example
+EVENT_NAME=<my-event-name>
+
+# stringify json event
+cat local/data/$EVENT_NAME.json | jq -c | jq -R
+
+# format message "<json_key>:::<json_value>"
+echo "$(cat local/data/$EVENT_NAME-key.json | jq -c):::$(cat local/data/$EVENT_NAME-value.json | jq -c)" > local/data/$EVENT_NAME-event.txt
+
+# produce sample message
+make produce-avro \
+  schema-key-id=1 \
+  schema-value-id=2 \
+  topic-name=<TOPIC_NAME> \
+  event-name=$EVENT_NAME
+```
+
+How to interact with `schema-registry` apis
+
+```bash
+TOPIC_NAME=<???>
+
+# verify registered schema
+curl -s -X GET localhost:8081/subjects/$TOPIC_NAME-value/versions
+curl -s -X GET localhost:8081/subjects/$TOPIC_NAME-value/versions/1 | jq
+# extract avsc
+curl -s -X GET localhost:8081/subjects/$TOPIC_NAME-value/versions/1 | jq -r ".schema" | jq
+```
+
 ## TODO
 
 * [ ] zio-prelude e.g. [newtype](https://github.com/zio/zio-prelude/blob/d34b5c0e74557edd8709f7c45b40297bf4280d77/src/main/scala/zio/prelude/NewtypeModule.scala) or refined ?

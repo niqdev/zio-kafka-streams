@@ -118,6 +118,48 @@ case ${PARAM_ACTION} in
       --data @"${CONTAINER_SCHEMA_PATH}/${PARAM_SCHEMA_NAME}.json" \
       "${SCHEMA_REGISTRY_URL}/subjects/${PARAM_SCHEMA_NAME}/versions"
   ;;
+  # TODO not used
+  "produce-avro")
+    PARAM_SCHEMA_KEY_ID=${2:?"Missing SCHEMA_KEY_ID"}
+    PARAM_SCHEMA_VALUE_ID=${3:?"Missing SCHEMA_VALUE_ID"}
+    PARAM_TOPIC_NAME=${4:?"Missing TOPIC_NAME"}
+    PARAM_EVENT_NAME=${5:?"Missing EVENT_NAME"}
+    echo "[*] SCHEMA_KEY_ID=${PARAM_SCHEMA_KEY_ID}"
+    echo "[*] SCHEMA_VALUE_ID=${PARAM_SCHEMA_VALUE_ID}"
+    echo "[*] TOPIC_NAME=${PARAM_TOPIC_NAME}"
+    echo "[*] EVENT_NAME=${PARAM_EVENT_NAME}"
+    CONTAINER_DATA_PATH="/data"
+
+    docker exec -i local-schema-registry bash -c \
+      "cat ${CONTAINER_DATA_PATH}/${PARAM_EVENT_NAME}-event.txt | kafka-avro-console-producer \
+        --bootstrap-server ${BOOTSTRAP_SERVERS} \
+        --property schema.registry.url=${SCHEMA_REGISTRY_URL} \
+        --property parse.key=true \
+        --property key.schema=\$(curl -s ${SCHEMA_REGISTRY_URL}/schemas/ids/${PARAM_SCHEMA_KEY_ID} | jq -r .schema) \
+        --property value.schema=\$(curl -s ${SCHEMA_REGISTRY_URL}/schemas/ids/${PARAM_SCHEMA_VALUE_ID} | jq -r .schema) \
+        --property key.separator=::: \
+        --topic ${PARAM_TOPIC_NAME}"
+  ;;
+  # TODO not used
+  "produce-avro-value")
+    PARAM_SCHEMA_VALUE_ID=${2:?"Missing SCHEMA_VALUE_ID"}
+    PARAM_TOPIC_NAME=${3:?"Missing TOPIC_NAME"}
+    PARAM_EVENT_NAME=${4:?"Missing EVENT_NAME"}
+    echo "[*] SCHEMA_VALUE_ID=${PARAM_SCHEMA_VALUE_ID}"
+    echo "[*] TOPIC_NAME=${PARAM_TOPIC_NAME}"
+    echo "[*] EVENT_NAME=${PARAM_EVENT_NAME}"
+    CONTAINER_DATA_PATH="/data"
+
+    docker exec -i local-schema-registry bash -c \
+      "cat ${CONTAINER_DATA_PATH}/${PARAM_EVENT_NAME}-event.tx | kafka-avro-console-producer \
+        --bootstrap-server ${BOOTSTRAP_SERVERS} \
+        --property schema.registry.url=${SCHEMA_REGISTRY_URL} \
+        --property parse.key=true \
+        --property key.serializer="org.apache.kafka.common.serialization.StringSerializer" \
+        --property value.schema=\$(curl -s ${SCHEMA_REGISTRY_URL}/schemas/ids/${PARAM_SCHEMA_VALUE_ID} | jq -r .schema) \
+        --property key.separator=::: \
+        --topic ${PARAM_TOPIC_NAME}"
+  ;;
   *)
     echo "ERROR: unknown command"
     exit 1
